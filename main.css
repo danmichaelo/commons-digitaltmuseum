@@ -1,0 +1,73 @@
+body {
+    color:#222;
+    padding: 20px;
+    font-family: sans-serif;
+    font-size:12px;
+}
+table {
+    font-size:100%;
+    width: 100%;
+}
+tr td:first-child { max-width: 400px; }
+.footer {
+    margin-left:auto;
+    margin-right:0px;
+    width: 100px;
+    margin-top:30px;
+}
+.spinner img {
+    vertical-align:middle;
+}
+div#filter {
+    border:1px solid #ccc; 
+    background:#efefef; 
+    padding:10px; 
+    margin:10px;
+}
+div#errors {
+    display: none;
+    padding:10px;
+    margin:10px;
+    border:1px solid red;
+    background: #ffefef;
+}
+/* Table Sorting */
+table.jquery-tablesorter th.headerSort {
+	/* @embed */
+	background-image: url(images/sort_both.gif);
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-position: center right;
+	padding-right: 21px;
+}
+table.jquery-tablesorter th.headerSortUp {
+	/* @embed */
+	background-image: url(images/sort_up.gif);
+}
+table.jquery-tablesorter th.headerSortDown {
+	/* @embed */
+	background-image: url(images/sort_down.gif);
+}
+table.wikitable {
+    margin: 1em 0;
+    background-color: #f9f9f9;
+    border: 1px #aaa solid;
+    border-collapse: collapse;
+    color: black;
+}
+table.wikitable > tr > th,
+table.wikitable > tr > td,
+table.wikitable > * > tr > th,
+table.wikitable > * > tr > td {
+    border: 1px #aaa solid;
+    padding: 0.2em;
+}
+table.wikitable > tr > th,
+table.wikitable > * > tr > th {
+    background-color: #f2f2f2;
+    text-align: center;
+}
+a.external {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAVklEQVR4Xn3PgQkAMQhDUXfqTu7kTtkpd5RA8AInfArtQ2iRXFWT2QedAfttj2FsPIOE1eCOlEuoWWjgzYaB/IkeGOrxXhqB+uA9Bfcm0lAZuh+YIeAD+cAqSz4kCMUAAAAASUVORK5CYII=") no-repeat scroll right center transparent;
+    padding-right: 13px;
+}
