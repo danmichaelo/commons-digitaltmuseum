@@ -1,0 +1,143 @@
+## -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
+<%inherit file="base.html"/>\
+<%block name="header">
+    <script>
+    <% 
+    a= "', '".join([col[0] for col in columns]) 
+    b= ", ".join(["%s:'%s'"%(k,v) for k,v in institutions.items()]) 
+    %>
+    $.oslobilder = {
+        columns : ['${a}'],
+        institutions : {${b}},
+        default_limit : ${default_limit},
+        default_sort : "${default_sort}",
+        default_sortorder : "${default_sortorder}"
+    };
+    </script>
+    <script src="js/oslobilder.js"></script>
+</%block>\
+
+<div id="intro">
+    <strong>Totalt er det registrert ${total} bilder på Commons, basert på ${unique} bilder fra oslobilder.no. Sist oppdatert <span id="last_update">-</span>.</strong>
+</div>
+
+<div id="filter"> 
+    <form method="post">
+        <table>
+            <tr id="institutions">
+                <td>
+                    Institusjoner:
+                </td>
+                <td colspan=4>
+                    [Alle: <a href="#" id="alle_pa">på</a> / <a href="#" id="alle_av">av</a> ]
+                    %for a in totals:
+                    <input type="checkbox" name="inst_${a}" id="inst_${a}" checked="checked" /><label for="inst_${a}">${institutions[a]} (${totals[a]})</label>
+                    %endfor
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="collection">Samling</label>:
+                </td>
+                <td>
+                    <input name="collection" id="collection" type="text" />
+                </td>
+                <td colspan=2 rowspan=3>
+                    Tips: Bruk <tt>*</tt> på begynnelsen og/eller slutten for å trunkere. 
+                    Du kan f.eks. søke etter <tt>*Wilse*</tt> som fotograf, eller <tt>Oslo*</tt> som samling.<br />
+                    Bruk <tt>#</tt> for å kun returnere resultater der feltet er tomt, f.eks. der samling ikke er oppgitt.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="author">Fotograf</label>:
+                </td>
+                <td>
+                    <input name="author" id="author" type="text" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="filename">Filnavn</label>:
+                </td>
+                <td>
+                    <input name="filename" id="filename" type="text" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="limit">Maks resultater</label>:
+                 </td>
+                 <td>
+                    <select name="limit" id="limit">
+                        %for a in [100,200,500,1000]:
+                        <% selected = ' selected="selected"' if default_limit == a else '' %>
+                        <option value="${a}"${selected}>${a}</option>
+                        %endfor
+                    </select>
+                </td>
+                <td style="width:150px;">
+                    <label for="sort">Sorter etter</label>:
+                </td>
+                <td>
+                    <select name="sort" id="sort">
+                        %for a in columns:
+                        <% selected = ' selected="selected"' if default_sort == a[0] else '' %>
+                        <option value="${a[0]}"${selected}>${a[1]}</option>
+                        %endfor
+                    </select>
+                    <select name="sortorder" id="sortorder">
+                        <% selected = ' selected="selected"' if default_sortorder == 'asc' else '' %>
+                        <option value="asc"${selected}>Stigende</option>
+                        <% selected = ' selected="selected"' if default_sortorder == 'desc' else '' %>
+                        <option value="desc"${selected}>Synkende</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <div style="height:18px;">
+            <input type="button" value="Nullstill" />
+            <input type="submit" value="Hent liste" /> <span class="spinner"><img src="images/spinner.gif" style="width:15px; height:15px;" /></span>
+        </div>
+    </form>
+</div>
+
+<div id="errors"></div>
+<div id="results">
+    <div id="results-intro"></div>
+    <div id="col-filter">
+    Vis kolonner:
+    %for col in columns:
+        <% chk = 'checked="checked"' if col[2] else '' %>
+        <input type="checkbox" id="chk_${col[0]}" ${chk} /><label for="chk_${col[0]}">${col[1]}</label>
+    %endfor
+    </div>
+
+    <table id="oslobilder" class="wikitable">
+        <thead><tr>
+        %for col in columns:
+            <th class="headerSort">${col[1]}</th>
+        %endfor
+        </tr></thead>
+        <tbody>
+        </tbody>
+        <tfoot></tfoot>
+    </table>
+
+</div>
+
+<script>
+$(document).ready(function() {
+    var d = new Date(${last_update}*1000);
+%for col in columns:
+<% hid = ("    $('tr>th:nth-child(%d),td:nth-child(%d)').hide();\n" % (loop.index+1,loop.index+1)) if not col[2] else '' %>\
+${hid}\
+%endfor
+    $('#oslobilder').tablesorter();
+    $('#last_update').html(d.toString("d. MMM yyyy, kl. HH.mm"));
+});
+
+</script>
+
+<div id="query"></div>

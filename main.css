@@ -1,28 +1,93 @@
 body {
     color:#222;
-    padding: 20px;
+    padding: 0px;
+    margin: 0px;
     font-family: sans-serif;
     font-size:12px;
 }
+tt {
+    background: #fefefe;
+}
+
+div#navbar {
+    background: #ffffcc;
+    padding:20px 20px 20px 20px;
+    border-bottom: 1px solid black;
+    margin: 0px 0px 10px 0px;
+}
+h1 {
+    margin: 20px 0px;
+    font-size:18px;
+    font-weight: bold;
+    color: #333;
+}
+div#navbar ul {
+    margin: 0px;
+    padding-left: 0px;
+    white-space: nowrap;
+   border-bottom: 1px solid #000;
+}
+
+#navbar ul, #navbar li {
+margin: 0;
+padding: 0;
+display: inline;
+list-style-type: none;
+}
+#navbar a, #navbar span { 
+    float: left;
+    line-height: 14px;
+font-weight: bold;
+margin: 0 10px 4px 10px;
+text-decoration: none;
+color: #999;
+}
+
+#navbar a:link, #navbar a:visited {
+    color: #999;
+    text-decoration: none;
+}
+
+#navbar a:hover {
+    color: #000;
+    text-decoration: none;
+}
+#navbar span.active {
+border-bottom: 4px solid #000;
+padding-bottom: 2px;
+background: transparent;
+color: #000;
+}
+
 table {
     font-size:100%;
     width: 100%;
 }
 tr td:first-child { max-width: 400px; }
-.footer {
-    margin-left:auto;
-    margin-right:0px;
-    width: 100px;
-    margin-top:30px;
+
+#footer {
+    color: gray;
+    font-size: 10px;
+    margin-top: 3em;
+    text-align: center;
+}
+#footer a {
+    color: #666699;
 }
 .spinner img {
     vertical-align:middle;
+}
+div#intro {
+    padding:0px 20px;
 }
 div#filter {
     border:1px solid #ccc; 
     background:#efefef; 
     padding:10px; 
-    margin:10px;
+    margin:10px 40px;
+}
+div#col-filter {
+    text-align:right;
 }
 div#errors {
     display: none;
@@ -30,6 +95,16 @@ div#errors {
     margin:10px;
     border:1px solid red;
     background: #ffefef;
+}
+div#results {
+    display: none;
+    padding:20px;
+}
+div#query {
+    padding-left:20px;
+    font-size:10px;
+    color:#888;
+    float:left;
 }
 /* Table Sorting */
 table.jquery-tablesorter th.headerSort {
@@ -70,4 +145,33 @@ table.wikitable > * > tr > th {
 a.external {
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAVklEQVR4Xn3PgQkAMQhDUXfqTu7kTtkpd5RA8AInfArtQ2iRXFWT2QedAfttj2FsPIOE1eCOlEuoWWjgzYaB/IkeGOrxXhqB+uA9Bfcm0lAZuh+YIeAD+cAqSz4kCMUAAAAASUVORK5CYII=") no-repeat scroll right center transparent;
     padding-right: 13px;
+}
+ul.dups {
+    margin: 0px 0px 10px 0px;
+    padding-left: 0;
+    white-space: nowrap;
+    background: #eeeeff;
+    padding:10px 20px;
+    border-bottom:1px solid #888;
+}
+.dups li {
+    display: table-cell;
+    list-style-type: none;
+    padding: 4px 20px;
+    text-align:center;
+}
+.dups a, .dups span { 
+}
+
+.dups a:link, .dups a:visited {
+    text-decoration: none;
+}
+.dups a img {
+    background-color: #E0E0E0;
+    border: 1px solid #AAAAAA;
+    margin: 0;
+    padding: 0.5ex;
+}
+td.thumb {
+    text-align: center;
 }

@@ -17,7 +17,8 @@
     function formatCol(row, colno) {
         var colname = $.oslobilder.columns[colno],
             val = row[colname],
-            sortkey = val;
+            sortkey = val,
+            d;
         switch (colname) {
         case 'institution':
             val = $.oslobilder.institutions[val];
@@ -27,26 +28,54 @@
             val = '<a class="external" href="http://www.oslobilder.no/' + row.institution + '/' + val + '">' + val + '</a>';
             sortkey = val;
             break;
-        case 'sourcedate':
+        case 'date':
             sortkey = val.replace(/[^\d]/g, "");
+            break;
+        case 'upload_date':
+            d = new Date(val*1000);
+            val = d.toString("d. MMM yyyy");
             break;
         }
         if (val === sortkey) {
-            return '<td>' + val + '</td>';
+            return '<td class="' + colname + '">' + val + '</td>';
         } else {
-            return '<td data-sort-value="' + sortkey + '">' + val + '</td>';
+            return '<td class="' + colname + '" data-sort-value="' + sortkey + '">' + val + '</td>';
         }
     }
 
-    function getData(addToHistory) {
-        var postdata = $("form").serialize();
+    function prepareData(addToHistory) {
+        var postdata = $('form tr:not(#institutions) input[value!=""]'),
+            url;
+        if ($('form tr#institutions :checked').length != $('form tr#institutions :checkbox').length) {
+            postdata = postdata.add('form tr#institutions :checked');
+        }
+        if (parseInt($('form #limit').val()) != $.oslobilder.default_limit) {
+            postdata = postdata.add('form #limit');
+        }
+        if ($('form #sort').val() != $.oslobilder.default_sort) {
+            postdata = postdata.add('form #sort');
+        }
+        if ($('form #sortorder').val() != $.oslobilder.default_sortorder) {
+            postdata = postdata.add('form #sortorder');
+        }
+        postdata = postdata.serialize();
         if (addToHistory) {
             try {
-                history.pushState(null, null, '?' + postdata);
+                url = './'
+                if (postdata.length > 0) {
+                    url += '?' + postdata;
+                }
+                history.pushState(null, null, url)
             } catch (e) {
+                //alert(e.message)
                 // ignore old browser
             }
         }
+        return postdata;
+    }
+
+    function getData(addToHistory) {
+        var postdata = prepareData(addToHistory);
         $.post("backend.fcgi", postdata, function (response) {
             var error = 0,
                 nimgs = 0,
@@ -59,7 +88,7 @@
             }
             if (error === 1) {
                 $('#errors').html(response);
-                $('#results').html('');
+                $('#results-intro').html('');
                 $('#errors').show();
             } else {
                 $('#errors').hide();
@@ -72,8 +101,16 @@
                     }
                     $('table#oslobilder > tbody').append(rowhtml);
                 });
-                $('#results').html('<strong>Viser ' + nimgs + ' bilder:</strong>');
-                $('#query').html('Spørringen var: ' + response.query);
+                var sortOrder = [$('form #sort')[0].selectedIndex];
+                if ($('form #sortorder').val() == 'asc') {
+                    sortOrder.push(0);
+                } else {
+                    sortOrder.push(1);
+                }
+                $('table#oslobilder').trigger('sorton', [sortOrder]);
+                $('#results-intro').html('<strong>Viser ' + nimgs + ' bilder:</strong>');
+                $('#query').html('Spørringen var: ' + response.query + '<br />Sidegenereringstid: ' + response.time + ' ms');
+                $('#results').fadeIn("slow");
                 toggleColumns();
             }
         });
@@ -91,9 +128,7 @@
 
         $('#collection').val('');
         $('#author').val('');
-        $.each($.oslobilder.institutions, function (key, value) {
-            $('#inst_' + key).attr('checked', false);
-        });
+        $('#institutions :checkbox').attr('checked', false);
 
         while ((match = search.exec(query)) !== null) {
             nkeys += 1;
@@ -105,13 +140,24 @@
                 $('#' + key).val(val);
             }
         }
+        if ($('#institutions :checked').length == 0) {
+            $('#institutions :checkbox').attr('checked', true);
+        }
+
         if (nkeys > 0) {
             getData(false);
-        } else {
-            $.each($.oslobilder.institutions, function (key, value) {
-                $('#inst_' + key).attr('checked', true);
-            });
         }
+    }
+
+    function resetForm(e) {
+
+        $('#institutions :checkbox').attr('checked', true);
+        $(':text').val('');
+        $('#limit').val($.oslobilder.default_limit);
+        $('#sort').val($.oslobilder.default_sort);
+        $('#sortorder').val($.oslobilder.default_sortorder);
+        prepareData(true);
+
     }
 
 
@@ -122,16 +168,12 @@
         });
 
         $('#alle_av').click(function (e) {
-            $.each($.oslobilder.institutions, function (key, value) {
-                $('#inst_' + key).attr('checked', false);
-            });
+            $('#institutions :checkbox').attr('checked', false);
             return false;
         });
 
         $('#alle_pa').click(function (e) {
-            $.each($.oslobilder.institutions, function (key, value) {
-                $('#inst_' + key).attr('checked', true);
-            });
+            $('#institutions :checkbox').attr('checked', true);
             return false;
         });
 
@@ -139,17 +181,18 @@
             .hide()  // hide it initially
             .ajaxStart(function () {
                 $(this).show();
-                $(':submit').attr('disabled', true);
+                $(':button,:submit').attr('disabled', true);
             })
             .ajaxStop(function () {
                 $(this).hide();
-                $(':submit').attr('disabled', false);
+                $(':button,:submit').attr('disabled', false);
             });
 
         $('form').on('submit', function (e) {
             e.preventDefault();
             getData(true);
         });
+        $('form :button').on('click', resetForm);
 
         $(window).bind("popstate", function (e) {
             parseUrlParams();

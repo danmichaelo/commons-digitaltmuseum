@@ -1,0 +1,47 @@
+## -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Oslobilder på Commons</title>
+    <link rel="stylesheet" href="main.css" />
+    <script src="js/date-nb-NO.js"></script>
+    <!--<script src="js/jquery.combined.js"></script>-->
+    <script src="js/jquery-1.8.2.min.js"></script>
+    <script src="js/jquery.mwExtension.js"></script>
+    <script src="js/jquery.tablesorter.js"></script>
+    <%block name="header">
+    </%block>
+</head>
+<body>
+    <div id="navbar">
+        <img src="../wikimedia-toolserver-button.png" style="width: 88px; height: 31px; float:right;" />
+        <h1>Oslobilder @ Commons</h1>
+        <ul>
+            ${navlink('./', 'Oversikt')}
+            ${navlink('dups.fcgi', 'Mulige duplikater')}
+            ${navlink('stats.fcgi', 'Statistikk')}
+        </ul>
+    </div>
+    <!--
+    <p style="background:#ffffaa; padding:10px;margin:10px;">
+        <em>Verktøyet er under utvikling. Resultatlisten oppdateres foreløpig med ujevne mellomrom. Miniatyrbilder vises ikke for alle bilder enda.</em>
+        </p>-->
+${self.body()}
+<div id="footer">
+<%block name="footer">
+    Dette verktøyet er skrevet av <a href="//no.wikipedia.org/wiki/Bruker:Danmichaelo">Danmichaelo</a>. 
+    <a href="https://github.com/danmichaelo/oslobilder">Vis kildekode</a> 
+    (tilgjengelig under <a href="http://creativecommons.org/licenses/by/sa/3.0/">CC-BY-SA 3.0</a>).
+</%block>
+</div>
+
+</body>
+</html>
+<%def name="navlink(url,txt)">
+    %if active_page == url:
+    <li><span class="active">${txt}</span></li>
+    %else:
+    <li><a href="${url}">${txt}</a></li>
+    %endif
+</%def>

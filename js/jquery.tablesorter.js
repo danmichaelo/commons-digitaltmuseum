@@ -62,6 +62,8 @@
 
     var ts,
         parsers = [];
+        //tables = [],
+        //firstTime = [];
 
     /* Parser utility functions */
 
@@ -176,6 +178,8 @@
                 row: [],
                 normalized: []
             };
+        
+        //console.log("Found " + totalRows + " rows");
 
         for ( var i = 0; i < totalRows; ++i ) {
 
@@ -482,6 +486,123 @@
         };
     }
 
+    function on_header_sorton ( e, data ) {
+        //console.log("on_header_sorton");
+        var table = $(e.target).closest('table')[0],
+            $table = $( table );
+        
+        var totalRows = ( $table[0].tBodies[0] && $table[0].tBodies[0].rows.length ) || 0;
+        if ( !table.sortDisabled && totalRows > 0 ) {
+            dosort($table, [data]);
+        }
+        return false;
+    }
+
+    function on_header_click ( e ) {
+        if ( e.target.nodeName.toLowerCase() === 'a' ) {
+            // The user clicked on a link inside a table header
+            // Do nothing and let the default link click action continue
+            return true;
+        }
+        var table = $(e.target).closest('table')[0],
+            $table = $( table ),
+            $headers = $table.find('thead:eq(0) > tr > th'),
+            config = $.data(table, 'tablesorter');
+
+
+        var totalRows = ( $table[0].tBodies[0] && $table[0].tBodies[0].rows.length ) || 0;
+        if ( !table.sortDisabled && totalRows > 0 ) {
+
+            // Cache jQuery object
+            var $cell = $( this );
+
+            // Get current column index
+            var i = this.column;
+
+            // Get current column sort order
+            this.order = this.count % 2;
+            this.count++;
+
+            // User only wants to sort on one column
+            if ( !e[config.sortMultiSortKey] ) {
+                // Flush the sort list
+                // Add column to sort list
+                //config.sortList.push( [i, this.order] );
+                dosort($table, [[i, this.order]]);
+
+            // Multi column sorting
+            } else {
+                // The user has clicked on an already sorted column.
+                if ( isValueInArray( i, config.sortList ) ) {
+                    // Reverse the sorting direction for all tables.
+                    for ( var j = 0; j < config.sortList.length; j++ ) {
+                        var s = config.sortList[j],
+                            o = config.headerList[s[0]];
+                        if ( s[0] === i ) {
+                            o.count = s[1];
+                            o.count++;
+                            s[1] = o.count % 2;
+                        }
+                    }
+                } else {
+                    // Add column to sort list array
+                    config.sortList.push( [i, this.order] );
+                }
+                dosort($table, config.sortList);
+            }
+
+
+            // Stop normal event by returning false
+            return false;
+        }
+    }
+
+    function dosort($table, sortList) {
+        var $headers = $table.find('thead:eq(0) > tr > th'),
+            config = $.data($table[0], 'tablesorter');
+        
+        if ( $.data($table[0], 'firstTime' )) {
+            $.data($table[0], 'firstTime', false);
+
+            // Legacy fix of .sortbottoms
+            // Wrap them inside inside a tfoot (because that's what they actually want to be) &
+            // and put the <tfoot> at the end of the <table>
+            var $sortbottoms = $table.find( '> tbody > tr.sortbottom' );
+            if ( $sortbottoms.length ) {
+                var $tfoot = $table.children( 'tfoot' );
+                if ( $tfoot.length ) {
+                    $tfoot.eq(0).prepend( $sortbottoms );
+                } else {
+                    $table.append( $( '<tfoot>' ).append( $sortbottoms ) );
+                }
+            }
+
+            explodeRowspans( $table );
+            // try to auto detect column type, and store in tables config
+            $table[0].config.parsers = buildParserCache( $table[0], $headers );
+        }
+
+        
+        // Build the cache for the tbody cells
+        // to share between calculations for this sort action.
+        // Re-calculated each time a sort action is performed due to possiblity
+        // that sort values change. Shouldn't be too expensive, but if it becomes
+        // too slow an event based system should be implemented somehow where
+        // cells get event .change() and bubbles up to the <table> here
+        var cache = buildCache( $table[0] );
+
+        config.sortList = sortList;
+        // Get the CSS class names, could be done else where.
+        var sortCSS = [ config.cssDesc, config.cssAsc ];
+        var sortMsg = [ 'Sorter synkende', 'Sorter stigende' ]; //mw.msg( 'sort-descending' ), mw.msg( 'sort-ascending' ) ];
+
+        // Set CSS for headers
+        setHeadersCss( $table[0], $headers, config.sortList, sortCSS, sortMsg );
+        appendToTable(
+            $table[0], multisort( $table[0], config.sortList, cache )
+        );
+    }
+
     /* Public scope */
 
     $.tablesorter = {
@@ -516,8 +637,8 @@
                     // Declare and cache.
                     var $document, $headers, cache, config, sortOrder,
                         $table = $( table ),
-                        shiftDown = 0,
-                        firstTime = true;
+                        shiftDown = 0;
+                        //firstTime = true;
 
                     // Quit if no tbody
                     if ( !table.tBodies ) {
@@ -534,6 +655,9 @@
                         }
                     }
                     $table.addClass( "jquery-tablesorter" );
+                    //tables[i] = table;
+                    $.data(table, 'firstTime', true);
+                    //firstTime[i] = true;
 
                     // New config object.
                     table.config = {};
@@ -562,94 +686,10 @@
 
                     // Apply event handling to headers
                     // this is too big, perhaps break it out?
-                    $headers.click( function ( e ) {
-                        if ( e.target.nodeName.toLowerCase() === 'a' ) {
-                            // The user clicked on a link inside a table header
-                            // Do nothing and let the default link click action continue
-                            return true;
-                        }
-
-                        if ( firstTime ) {
-                            firstTime = false;
-
-                            // Legacy fix of .sortbottoms
-                            // Wrap them inside inside a tfoot (because that's what they actually want to be) &
-                            // and put the <tfoot> at the end of the <table>
-                            var $sortbottoms = $table.find( '> tbody > tr.sortbottom' );
-                            if ( $sortbottoms.length ) {
-                                var $tfoot = $table.children( 'tfoot' );
-                                if ( $tfoot.length ) {
-                                    $tfoot.eq(0).prepend( $sortbottoms );
-                                } else {
-                                    $table.append( $( '<tfoot>' ).append( $sortbottoms ) );
-                                }
-                            }
-
-                            explodeRowspans( $table );
-                            // try to auto detect column type, and store in tables config
-                            table.config.parsers = buildParserCache( table, $headers );
-                        }
-
-                        // Build the cache for the tbody cells
-                        // to share between calculations for this sort action.
-                        // Re-calculated each time a sort action is performed due to possiblity
-                        // that sort values change. Shouldn't be too expensive, but if it becomes
-                        // too slow an event based system should be implemented somehow where
-                        // cells get event .change() and bubbles up to the <table> here
-                        cache = buildCache( table );
-
-                        var totalRows = ( $table[0].tBodies[0] && $table[0].tBodies[0].rows.length ) || 0;
-                        if ( !table.sortDisabled && totalRows > 0 ) {
-
-                            // Cache jQuery object
-                            var $cell = $( this );
-
-                            // Get current column index
-                            var i = this.column;
-
-                            // Get current column sort order
-                            this.order = this.count % 2;
-                            this.count++;
-
-                            // User only wants to sort on one column
-                            if ( !e[config.sortMultiSortKey] ) {
-                                // Flush the sort list
-                                config.sortList = [];
-                                // Add column to sort list
-                                config.sortList.push( [i, this.order] );
-
-                            // Multi column sorting
-                            } else {
-                                // The user has clicked on an already sorted column.
-                                if ( isValueInArray( i, config.sortList ) ) {
-                                    // Reverse the sorting direction for all tables.
-                                    for ( var j = 0; j < config.sortList.length; j++ ) {
-                                        var s = config.sortList[j],
-                                            o = config.headerList[s[0]];
-                                        if ( s[0] === i ) {
-                                            o.count = s[1];
-                                            o.count++;
-                                            s[1] = o.count % 2;
-                                        }
-                                    }
-                                } else {
-                                    // Add column to sort list array
-                                    config.sortList.push( [i, this.order] );
-                                }
-                            }
-
-                            // Set CSS for headers
-                            setHeadersCss( $table[0], $headers, config.sortList, sortCSS, sortMsg );
-                            appendToTable(
-                                $table[0], multisort( $table[0], config.sortList, cache )
-                            );
-
-                            // Stop normal event by returning false
-                            return false;
-                        }
-
+                    $table.bind('sorton', on_header_sorton)
+                    $headers.click(on_header_click)
                     // Cancel selection
-                    } ).mousedown( function () {
+                        .mousedown( function () {
                         if ( config.cancelSelection ) {
                             this.onselectstart = function () {
                                 return false;

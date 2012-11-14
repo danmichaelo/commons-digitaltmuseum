@@ -2,6 +2,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
 
 import re, sys, os
+from time import time
 
 import cgi
 from cgi import escape
@@ -19,22 +20,22 @@ from mako.template import Template
 from mako.lookup import TemplateLookup
 import mwclient
 from danmicholoparser import TemplateEditor
-
-institutions = {
-    'OMU': 'Oslo Museum',
-    'BAR': 'Oslo byarkiv',
-    'NF': 'Norsk folkemuseum',
-    'ARB': 'Arbeiderbevegelsens arkiv og bibliotek',
-    'TELE': 'Telemuseet',
-    'NTM': 'Norsk Teknisk Museum',
-    'UBB': 'Universitetsbiblioteket i Bergen'
-    }
+from config import default_limit, default_sort, default_sortorder, institutions, columns
+import string
 
 def app(environ, start_response):
 
     start_response('200 OK', [('Content-Type', 'text/html')])
 
-    limit = 200
+    start_time = time()
+
+    f = open('last_update', 'r')
+    last_update = f.read()
+    f.close()
+
+    plimit = default_limit
+    psort = default_sort
+    porder = default_sortorder
     where = []
     whereData = []
     post_input = {}
@@ -52,11 +53,20 @@ def app(environ, start_response):
                 req_inst.append(key.split('_')[1].decode('utf-8'))
             #yield key + ' = ' + val[0] + '\n'
             elif key == 'limit':
-                limit = int(val)
+                try:
+                    plimit = int(val)
+                except ValueError:
+                    plimit = default_limit
+            elif key == 'sort':
+                psort = re.sub('[^\w]', '', val) # leaves A-Za-z0-9_
+            elif key == 'order':
+                porder = 'DESC' if val == 'desc' else 'ASC'
             else:
                 for knownkey in ['collection', 'author', 'filename']:
                     if key == knownkey and len(val) > 0:
-                        if val[0] == '*' and val[-1] == '*':
+                        if val == '#':
+                            where.append('%s=""' % knownkey)
+                        elif val[0] == '*' and val[-1] == '*':
                             where.append('%s LIKE ?' % knownkey)
                             whereData.append('%' + val.decode('utf-8')[1:-1] + '%')
                         elif val[-1] == '*':
@@ -69,10 +79,7 @@ def app(environ, start_response):
                             where.append('%s=?' % knownkey)
                             whereData.append(val.decode('utf-8'))
                 
-        if len(req_inst) == 0:
-            yield "none"
-            return
-        elif len(req_inst) < len(institutions):
+        if len(req_inst) > 0 and len(req_inst) < len(institutions):
             where.append('institution IN (%s)' % ','.join( ["?" for q in range(len(req_inst))] ))
             whereData.extend(req_inst)
 
@@ -85,23 +92,47 @@ def app(environ, start_response):
     #return
 
     sql = sqlite3.connect('oslobilder.db')
+    #sql.row_factory = sqlite3.Row
     cur = sql.cursor()
     rows = []
     totals = {}
     total = 0
-    for row in cur.execute(u'SELECT filename, width, height, size, institution, imageid, ' + \
-                            'collection, author, sourcedate, description FROM files' + where + ' LIMIT %d'%limit, whereData):
-        url = 'http://commons.wikimedia.org/wiki/File:' + urllib.quote(row[0].encode('utf-8'))
-        url = '<a href="%s">%s</a>' % (url, row[0])
-        #inst = institutions[row[4]]
+    query = u'SELECT filename, width, height, size, institution, imageid, ' + \
+             'collection, author, date, description, upload_date ' + \
+             'FROM files' + where + ' ORDER BY %s %s LIMIT %s' % (psort, porder, plimit)
+    for row in cur.execute(query, whereData):
+        enc = urllib.quote(row[0].encode('utf-8'))
+        url = 'http://commons.wikimedia.org/wiki/File:' + enc
+        thumbmax = 120
+        if row[1] > row[2]:
+            thumbw = thumbmax
+            thumbh = round(float(row[2])/row[1]*thumbmax)
+        else:
+            thumbh = thumbmax
+            thumbw = round(float(row[1])/row[2]*thumbmax)
 
-        row2 = {'filename': url, 'width': row[1], 'height': row[2], 'size': '%.f' % (row[3]/1024), 'institution': row[4], 'imageid': row[5], 'collection': row[6],
-                'author': row[7], 'sourcedate': row[8], 'description': row[9] }
+        thumb = '<a href="%s"><img src="/tsthumb/tsthumb?f=%s&domain=commons.wikimedia.org&w=120&h=120" border="0" alt="%s" width="%d" height="%d"/></a>' % (url, enc, row[0], thumbw, thumbh)
+        url = '<a href="%s">%s</a>' % (url, row[0])
+
+        row2 = {'thumb': thumb, 'filename': url, 'width': row[1], 'height': row[2], 
+                'size': '%.f' % (row[3]/1024), 'institution': row[4], 'imageid': row[5], 
+                'collection': row[6], 'author': row[7], 'date': row[8], 'description': row[9], 
+                'upload_date': row[10] }
         rows.append(row2)
         #s = '<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n' % (row[4], row[5], row[6])
         #yield s.encode('utf-8')
     
-    yield json.dumps({ 'where': where, 'data': whereData, 'rows': rows })
+    end_time = time()
+    time_spent = int((end_time - start_time)*1000)
+    
+    f = open('counter', 'r+')
+    cnt = int(f.read()) + 1
+    f.seek(0)
+    f.write('%d' % cnt)
+    f.truncate()
+    f.close()
+
+    yield json.dumps({ 'where': where, 'data': whereData, 'rows': rows, 'query': query, 'time': time_spent, 'last_update': last_update })
     #yield '</table>\n'
     #yield 'ok\n'
 

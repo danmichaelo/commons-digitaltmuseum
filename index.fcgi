@@ -17,46 +17,42 @@ from mako.template import Template
 from mako.lookup import TemplateLookup
 import mwclient
 from danmicholoparser import TemplateEditor
-
-institutions = {
-    'OMU': 'Oslo Museum',
-    'BAR': 'Oslo byarkiv',
-    'NF': 'Norsk folkemuseum',
-    'ARB': 'Arbeiderbevegelsens arkiv og bibliotek',
-    'TELE': 'Telemuseet',
-    'NTM': 'Norsk Teknisk Museum',
-    'UBB': 'Universitetsbiblioteket i Bergen'
-    }
-
-columns = [
-    ['filename', 'Filnavn', True],
-    ['width', 'Bredde (px)', True],
-    ['height', u'Høyde (px)', True],
-    ['size', u'Størrelse (kB)', True],
-    ['institution', u'Institusjon', True],
-    ['imageid', u'Bilde-ID', True],
-    ['collection', u'Samling', True],
-    ['author', u'Fotograf', True],
-    ['sourcedate', u'Dato', True],
-    ['description', u'Beskrivelse', False]
-]
+from config import default_limit, default_sort, default_sortorder, institutions, columns
 
 def app(environ, start_response):
 
     start_response('200 OK', [('Content-Type', 'text/html')])
+    
+    f = open('last_update', 'r')
+    last_update = f.read()
+    f.close()
 
     sql = sqlite3.connect('oslobilder.db')
     cur = sql.cursor()
     rows = []
     row = cur.execute(u'SELECT count(filename) FROM files').fetchone()
     total = row[0]
+    rows = cur.execute(u'SELECT 1 FROM files GROUP BY institution,imageid').fetchall()
+    unique = len(rows)
     totals = {}
     for row in cur.execute(u'SELECT institution, count(institution) FROM files GROUP BY institution'):
         totals[row[0]] = row[1]
 
     mylookup = TemplateLookup(directories=['.'], input_encoding='utf-8', output_encoding='utf-8')
     tpl = Template(filename='template.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
-    yield tpl.render_unicode(rows=[], total=total, totals=totals, institutions=institutions, columns=columns).encode('utf-8')
+    yield tpl.render_unicode(
+            active_page='./', 
+            rows=[], 
+            total=total, 
+            unique=unique, 
+            totals=totals, 
+            institutions=institutions, 
+            columns=columns, 
+            last_update=last_update,
+            default_limit=default_limit,
+            default_sort=default_sort,
+            default_sortorder=default_sortorder
+            ).encode('utf-8')
 
 WSGIServer(app).run()
 
