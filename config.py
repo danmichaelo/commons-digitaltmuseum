@@ -12,6 +12,7 @@ institutions = {
     'ARB': 'Arbeiderbevegelsens arkiv og bibliotek',
     'TELE': 'Telemuseet',
     'NTM': 'Norsk Teknisk Museum',
+    'KFS': 'DEXTRA Photo / NTM',
     'UBB': 'Universitetsbiblioteket i Bergen'
     }
 
@@ -29,3 +30,8 @@ columns = [
     ['upload_date', u'Overført', True],
     ['description', u'Beskrivelse', False]
 ]
+
+fieldnames = ['Bildetittel', 'Motiv', 'Datering', 'Fotograf', 'Avbildet person', 
+              'Avbildet sted', 'Utsikt over', 'Utgiver', 'Permalenke',
+              'Emneord', 'Bildenummer', 'Historikk', 
+              'Permalenke', 'Eierinstitusjon', 'Arkiv/Samling']
