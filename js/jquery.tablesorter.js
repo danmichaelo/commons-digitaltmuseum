@@ -686,7 +686,7 @@
 
                     // Apply event handling to headers
                     // this is too big, perhaps break it out?
-                    $table.bind('sorton', on_header_sorton)
+                    $table.bind('sorton', on_header_sorton);
                     $headers.click(on_header_click)
                     // Cancel selection
                         .mousedown( function () {

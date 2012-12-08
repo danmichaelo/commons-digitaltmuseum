@@ -80,12 +80,14 @@
             var error = 0,
                 nimgs = 0,
                 i;
-            try {
-                response = $.parseJSON(response);
-            } catch (e) {
-                error = 1;
-                // We report an error, and show the erronous JSON string (we replace all " by ', to prevent another error)
-            }
+            //console.log("OK");
+            //console.log(response);
+            //try {
+            //    response = $.parseJSON(response);
+            //} catch (e) {
+            //    error = 1;
+            //    // We report an error, and show the erronous JSON string (we replace all " by ', to prevent another error)
+            //}
             if (error === 1) {
                 $('#errors').html(response);
                 $('#results-intro').html('');
