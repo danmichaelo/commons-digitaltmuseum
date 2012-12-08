@@ -6,6 +6,7 @@ import sqlite3
 import time, datetime
 from danmicholoparser import TemplateEditor
 import logging
+import logging.handlers
 import time
 
 debug = True
@@ -14,7 +15,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 
-file_handler = logging.FileHandler('updater.log')
+file_handler = logging.handlers.RotatingFileHandler('updater.log', maxBytes=100000, backupCount=3)
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -59,11 +60,15 @@ for img in page.embeddedin(namespace=6):
     collection = ''
     if 'collection' in tpl.parameters:
         collection = tpl.parameters['collection']
+    elif 3 in tpl.parameters:
+        collection = tpl.parameters[3]
 
     if 'information' in te.templates:
         tpl = te.templates['information'][0]
+    elif 'artwork' in te.templates:
+        tpl = te.templates['artwork'][0]
     else:
-        logger.warning('[[%s]] %s', (filename, '{{information}}-template not found!'))
+        logger.warning('[[%s]] %s', filename, 'Did not find {{information}} or {{artwork}}-templates!')
         continue
     
     if 'description' in tpl.parameters:
@@ -72,7 +77,7 @@ for img in page.embeddedin(namespace=6):
         desc = tpl.parameters['Description']
     else:
         desc = ''
-        logger.warning('[[%s]] %s', (filename, '{{information}} does not contain |description='))
+        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |description=')
         continue
 
     if 'date' in tpl.parameters:
@@ -81,7 +86,7 @@ for img in page.embeddedin(namespace=6):
         date = tpl.parameters['Date']
     else:
         date = ''
-        logger.warning('[[%s]] %s', (filename, '{{information}} does not contain |date='))
+        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |date=')
         continue
     
     if 'source' in tpl.parameters:
@@ -90,7 +95,7 @@ for img in page.embeddedin(namespace=6):
         source = tpl.parameters['Source']
     else:
         source = ''
-        logger.warning('[[%s]] %s', (filename, '{{information}} does not contain |source='))
+        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |source=')
         continue
 
     if 'author' in tpl.parameters:
@@ -165,7 +170,7 @@ for img in page.embeddedin(namespace=6):
             val = []
             for k,v in data.iteritems():
                 if v != row2[k]:
-                    para.append('SET %s=?' % k)
+                    para.append('%s=?' % k)
                     val.append(v)
             val.append(firstrev['revid'])
             query = u'UPDATE files SET %s WHERE first_revision=?' % ', '.join(para)
