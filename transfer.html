@@ -1,0 +1,152 @@
+## -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
+<%inherit file="base.html"/>\
+<%block name="header">
+    <script>
+        wgServer = ".";
+        wgScriptPath = "/proxy";
+        wgScript = "/proxy/index.php";
+        wgUserName = "Danmichaelo";
+        wgUserLanguage = "no";
+        wgArticlePath = "/wiki/$1";
+        wgVersion = "1.21wmf2";
+        wgAction = "view";
+        skin = "vector";
+
+        wgTitle = "Upload";
+        wgCanonicalSpecialPageName = "Upload";
+        wgPageName = "Special:Upload";
+        wgNamespaceNumber = -1;
+        wgCurRevisionId = 0;
+        wgArticleId = 0;
+        wgIsArticle = false;
+
+        /* wgTitle = "Edvard Grieg with grand piano, c. 1900.jpeg";
+        wgCanonicalSpecialPageName = false;
+        wgPageName = "File:Edvard_Grieg_with_grand_piano,_c._1900.jpeg";
+        wgNamespaceNumber = 6;
+        wgCurRevisionId = 1;
+        wgArticleId = 1;
+        wgIsArticle = true; */
+
+    </script>
+    <script src="hotcat.js"></script>
+    <script src="js/transfer.js"></script>
+</%block>\
+
+<span id="ca-edit"></span>
+
+<form id="theform" method="POST">
+    <ol>
+        <li>Lim inn adressen til et bilde på oslobilder.no og trykk Sjekk.</li>
+        <li>Scriptet sjekker om bildets lisens er ok, og trekker ut så mye som mulig informasjon om bildet og tilpasse det til Commons.</li>
+        <li>Informasjonen kan sjekkes og redigeres før opplasting, og kategorier bør legges til (emneordene kan i en del tilfeller brukes som inspirasjon, selv om de ikke er direkte overførbare)</li>
+    </ol>
+    <label for="inputurl">URL</label>: <input id="inputurl" type="text" size="100" />
+    <input id="okbtn" type="submit" value=" Sjekk " />
+    <span class="spinner"><img src="images/spinner.gif" style="width:15px; height:15px;" /></span>
+</form>
+
+<div id="info">
+    <table cellpadding="4" cellspacing="0">
+        <tr>
+            <th>
+                Bildetittel:
+            </th>
+            <td id="Bildetittel">
+                -
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Motiv:
+            </th>
+            <td id="Motiv">
+                -
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Historikk:
+            </th>
+            <td id="Historikk">
+                -
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Emneord:
+            </th>
+            <td id="Emneord">
+                -
+            </td>
+            <td rowspan="2" class="tip">
+                <strong>Tips:</strong> Disse kan brukes som inspirasjon til kategorier.
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Avbildet:
+            </th>
+            <td id="Avbildet">
+                -
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Fotograf:
+            </th>
+            <td id="Fotograf">
+                -
+            </td>
+            <td class="warn">
+                <strong>Merk:</strong> Fant ingen fotograf. Noen ganger står fotografens navn <em>kun</em> i det grå feltet nederst på bildet,
+                som dette verktøyet ikke kan lese. Du bør sjekke om navnet står der, og evt. fylle det inn manuelt.
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Datering:
+            </th>
+            <td id="Datering">
+                -
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Lisens:
+            </th>
+            <td id="Lisens">
+                -
+            </td>
+        </tr>
+    </table>
+</div>
+
+<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload">
+    <table id="mw-htmlform-description">
+        <tr>
+            <td>
+                Filnavn:
+            </td>
+            <td>
+                <input id="wpDestFile" size=60 />
+            </td>
+            <td class="warn">
+                <strong>Merk:</strong> 
+                    Du bør velge et mer beskrivende filnavn.
+            </td>
+        </tr>
+        <tr>
+            <td valign="top">
+                Beskrivelse:
+            </td>
+            <td colspan="2">
+                <textarea id="wpUploadDescription" style="width:100%" rows="20" name="wpUploadDescription"></textarea>
+            </td>
+        </tr>
+    </table>
+    <span id="imgLink"></span>
+    <input type="submit" name="fake_upload" value="Last opp" />
+</form>
+
+<!--<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="/wiki/Special:Categories" title="Special:Categories">Kategorier</a>: <ul><li><a href="/wiki/Category:Media_from_oslobilder.no" title="Category:Media from oslobilder.no">Media from oslobilder.no</a></li><li><a href="/wiki/Category:Media_from_the_collection_of_Oslo_Museum" title="Category:Media from the collection of Oslo Museum">Media from the collection of Oslo Museum</a></li><li><a href="/wiki/Category:Edvard_Grieg" title="Category:Edvard Grieg">Edvard Grieg</a></li><li><a href="/wiki/Category:People_with_pianos" title="Category:People with pianos">People with pianos</a></li></ul></div><div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-user-shown">Skjult kategori: <ul><li><a href="/wiki/Category:CC-BY-SA-3.0" title="Category:CC-BY-SA-3.0">CC-BY-SA-3.0</a></li></ul></div></div>-->
