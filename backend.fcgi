@@ -21,11 +21,11 @@ from mako.lookup import TemplateLookup
 import mwclient
 from danmicholoparser import TemplateEditor
 from config import default_limit, default_sort, default_sortorder, institutions, columns
-import string
+from common import get_thumb_url
 
 def app(environ, start_response):
 
-    start_response('200 OK', [('Content-Type', 'text/html')])
+    start_response('200 OK', [('Content-Type', 'application/json')])
 
     start_time = time()
 
@@ -101,8 +101,9 @@ def app(environ, start_response):
              'collection, author, date, description, upload_date ' + \
              'FROM files' + where + ' ORDER BY %s %s LIMIT %s' % (psort, porder, plimit)
     for row in cur.execute(query, whereData):
-        enc = urllib.quote(row[0].encode('utf-8'))
-        url = 'http://commons.wikimedia.org/wiki/File:' + enc
+        name = row[0].replace(' ', '_')
+        name_enc = urllib.quote(name.encode('utf-8'))
+        url = 'http://commons.wikimedia.org/wiki/File:' + name_enc
         thumbmax = 120
         if row[1] > row[2]:
             thumbw = thumbmax
@@ -111,7 +112,11 @@ def app(environ, start_response):
             thumbh = thumbmax
             thumbw = round(float(row[1])/row[2]*thumbmax)
 
-        thumb = '<a href="%s"><img src="/tsthumb/tsthumb?f=%s&domain=commons.wikimedia.org&w=120&h=120" border="0" alt="%s" width="%d" height="%d"/></a>' % (url, enc, row[0], thumbw, thumbh)
+        #thumb = '<a href="%s"><img src="/tsthumb/tsthumb?f=%s&domain=commons.wikimedia.org&w=120&h=120" border="0" alt="%s" width="%d" height="%d"/></a>' % (url, enc, row[0], thumbw, thumbh)
+
+        thumb_url = get_thumb_url(name, thumbw)
+        thumb = '<a href="%s"><img src="%s" border="0" alt="%s" width="%d" height="%d"/></a>' % (url, thumb_url, row[0], thumbw, thumbh)
+
         url = '<a href="%s">%s</a>' % (url, row[0])
 
         row2 = {'thumb': thumb, 'filename': url, 'width': row[1], 'height': row[2], 
