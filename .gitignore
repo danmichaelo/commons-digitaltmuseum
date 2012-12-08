@@ -1,0 +1,17 @@
+# Python
+*.py[co]
+
+# Vim swap
+*.swp
+
+# Login info
+wp_private.py
+
+# Skip DB, rotated logs and backups
+*.db
+*.log*
+*.bak
+
+# Mac stuff 
+*.DS_Store
+
