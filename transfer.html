@@ -35,15 +35,22 @@
 
 <span id="ca-edit"></span>
 
-<form id="theform" method="POST">
+<form id="theform" method="POST" class="well form-inline">
     <ol>
         <li>Lim inn adressen til et bilde på oslobilder.no og trykk Sjekk.</li>
         <li>Scriptet sjekker om bildets lisens er ok, og trekker ut så mye som mulig informasjon om bildet og tilpasse det til Commons.</li>
         <li>Informasjonen kan sjekkes og redigeres før opplasting, og kategorier bør legges til (emneordene kan i en del tilfeller brukes som inspirasjon, selv om de ikke er direkte overførbare)</li>
     </ol>
-    <label for="inputurl">URL</label>: <input id="inputurl" type="text" size="100" />
-    <input id="okbtn" type="submit" value=" Sjekk " />
-    <span class="spinner"><img src="images/spinner.gif" style="width:15px; height:15px;" /></span>
+    <!--<label for="inputurl">URL</label>: -->
+    <div class="row-fluid">
+        <div class="span10">
+            <input id="inputurl" type="text" placeholder="URL" class="input-block-level" />
+        </div>
+        <div class="span2">
+            <button class="btn btn-primary" id="okbtn" type="submit">Sjekk</button>
+            <span class="spinner"><img src="images/spinner.gif" style="width:15px; height:15px;" /></span>
+        </div>
+    </div>
 </form>
 
 <div id="info">
@@ -122,14 +129,14 @@
     </table>
 </div>
 
-<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload">
+<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload" class="well">
     <table id="mw-htmlform-description">
         <tr>
             <td>
                 Filnavn:
             </td>
             <td>
-                <input id="wpDestFile" size=60 />
+                <input id="wpDestFile" />
             </td>
             <td class="warn">
                 <strong>Merk:</strong> 
@@ -146,7 +153,7 @@
         </tr>
     </table>
     <span id="imgLink"></span>
-    <input type="submit" name="fake_upload" value="Last opp" />
+    <button type="submit" name="fake_upload" class="btn btn-primary">Last opp</button>
 </form>
 
 <!--<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="/wiki/Special:Categories" title="Special:Categories">Kategorier</a>: <ul><li><a href="/wiki/Category:Media_from_oslobilder.no" title="Category:Media from oslobilder.no">Media from oslobilder.no</a></li><li><a href="/wiki/Category:Media_from_the_collection_of_Oslo_Museum" title="Category:Media from the collection of Oslo Museum">Media from the collection of Oslo Museum</a></li><li><a href="/wiki/Category:Edvard_Grieg" title="Category:Edvard Grieg">Edvard Grieg</a></li><li><a href="/wiki/Category:People_with_pianos" title="Category:People with pianos">People with pianos</a></li></ul></div><div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-user-shown">Skjult kategori: <ul><li><a href="/wiki/Category:CC-BY-SA-3.0" title="Category:CC-BY-SA-3.0">CC-BY-SA-3.0</a></li></ul></div></div>-->

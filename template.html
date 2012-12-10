@@ -30,13 +30,16 @@
             <td colspan=4>
                 [Alle: <a href="#" id="alle_pa">på</a> / <a href="#" id="alle_av">av</a> ]
                 %for a in totals:
-                <input type="checkbox" name="inst_${a}" id="inst_${a}" checked="checked" /><label for="inst_${a}">${institutions[a]} (${totals[a]})</label>
+                <label class="checkbox" style="display:inline-block;">
+                    <input type="checkbox" name="inst_${a}" id="inst_${a}" checked="checked" />
+                    ${institutions[a]} (${totals[a]})
+                </label>
                 %endfor
             </td>
         </tr>
         <tr>
             <td>
-                <label for="collection">Samling</label>:
+                <label for="collection">Samling:</label>
             </td>
             <td>
                 <input name="collection" id="collection" type="text" />
@@ -49,7 +52,7 @@
         </tr>
         <tr>
             <td>
-                <label for="author">Fotograf</label>:
+                <label for="author">Fotograf:</label>
             </td>
             <td>
                 <input name="author" id="author" type="text" />
@@ -57,7 +60,7 @@
         </tr>
         <tr>
             <td>
-                <label for="filename">Filnavn</label>:
+                <label for="filename">Filnavn:</label>
             </td>
             <td>
                 <input name="filename" id="filename" type="text" />
@@ -65,7 +68,7 @@
         </tr>
         <tr>
             <td>
-                <label for="limit">Maks resultater</label>:
+                <label for="limit">Maks resultater:</label>
              </td>
              <td>
                 <select name="limit" id="limit">
@@ -76,7 +79,7 @@
                 </select>
             </td>
             <td style="width:150px;">
-                <label for="sort">Sorter etter</label>:
+                <label for="sort">Sorter etter:</label>
             </td>
             <td>
                 <select name="sort" id="sort">
@@ -96,8 +99,8 @@
     </table>
 
     <div style="height:18px;">
-        <input type="button" value="Nullstill" />
-        <input type="submit" value="Hent liste" /> 
+        <button type="button" class="btn">Nullstill</button>
+        <button type="submit" class="btn btn-primary">Hent liste</button>
         <span class="spinner"><img src="images/spinner.gif" style="width:15px; height:15px;" /></span>
     </div>
 </form>
@@ -108,8 +111,11 @@
     <div id="col-filter">
     Vis kolonner:
     %for col in columns:
-        <% chk = 'checked="checked"' if col[2] else '' %>
-        <input type="checkbox" id="chk_${col[0]}" ${chk} /><label for="chk_${col[0]}">${col[1]}</label>
+    <% chk = 'checked="checked"' if col[2] else '' %>
+        <label type="checkbox" style="display:inline-block;">
+            <input type="checkbox" id="chk_${col[0]}" ${chk} />
+            ${col[1]}
+        </label>
     %endfor
     </div>
 

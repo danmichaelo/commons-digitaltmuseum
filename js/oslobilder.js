@@ -194,7 +194,7 @@
             e.preventDefault();
             getData(true);
         });
-        $('form :button').on('click', resetForm);
+        $('form button[type!=submit]').on('click', resetForm);
 
         $(window).bind("popstate", function (e) {
             parseUrlParams();
