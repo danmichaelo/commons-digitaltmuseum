@@ -43,7 +43,7 @@ def app(environ, start_response):
     #yield '<h1>FastCGI Environment</h1>'
     #yield escape(environ.post('url'))
     url = form.getfirst('url')
-    if not url.find('http://www.oslobilder.no') == 0:
+    if not re.match(r'http://(www\.)?oslobilder\.no', url):
         yield "Invalid url!"
         return
     #yield url
