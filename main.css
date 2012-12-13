@@ -83,9 +83,10 @@ table {
 tr td:first-child { max-width: 400px; }
 
 #footer {
+    clear: both;
     color: gray;
     font-size: 10px;
-    margin-top: 3em;
+    margin: 3em;
     text-align: center;
 }
 #footer a {

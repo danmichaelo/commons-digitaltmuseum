@@ -21,7 +21,7 @@
     <strong>Totalt er det registrert ${total} bilder på Commons, basert på ${unique} bilder fra oslobilder.no. Sist oppdatert <span id="last_update">-</span>.</strong>
 </div>
 
-<form method="post">
+<form method="post" class="well form-inline">
     <table>
         <tr id="institutions">
             <td>
@@ -30,7 +30,7 @@
             <td colspan=4>
                 [Alle: <a href="#" id="alle_pa">på</a> / <a href="#" id="alle_av">av</a> ]
                 %for a in totals:
-                <label class="checkbox" style="display:inline-block;">
+                <label class="checkbox">
                     <input type="checkbox" name="inst_${a}" id="inst_${a}" checked="checked" />
                     ${institutions[a]} (${totals[a]})
                 </label>

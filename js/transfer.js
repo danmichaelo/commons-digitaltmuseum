@@ -30,6 +30,8 @@ function kortform(s) {
             return 'NTM';
         case 'universitetsbiblioteket i bergen':
             return 'UBB';
+        case 'dextra photo':
+            return 'KFS';
         default:
             return 'UNKNOWN';
     }
@@ -68,9 +70,12 @@ $(document).ready(function(){
         if (historikk != "NOTFOUND") {
             beskrivelse += ' ' + historikk + '.';
         }
-        var lics = $('select.license').val();
-        if (lics !== undefined) {
-            license = '{{' + lics.join('}}\n{{') + '}}';
+        var lics = $('select.license');
+        if (lics.length > 0) {
+            license = "";
+            $.each(lics, function(ind, lic) {
+                license += $(lic).val() + "\n";
+            });
         } else {
             license = '{{' + license + '}}';
         }
@@ -98,20 +103,30 @@ $(document).ready(function(){
                 imgFilename += ' (' + year + ')';
             }
             imgFilename += '.jpg';
+            $('#wpDestFile').parent().parent().removeClass('warning');
+            $('#wpDestFile').next('.help-inline').hide();
         } else {
             $('#Bildetittel').html('-');
             imgFilename = getQueryVariable('filename', src);
-            $('#wpDestFile').parent().siblings('.warn').show();
+            //$('#wpDestFile').parent().siblings('.warn').show();
+            $('#wpDestFile').parent().parent().addClass('warning');
+            $('#wpDestFile').next('.help-inline').show();
         }
         $('#wpDestFile').val(imgFilename);
-
-        $('#wpDestFile').parent().siblings('.warn')
     }
 
     $('#theform').on('submit', function(e) {
         var url = $('#inputurl').val();
         $.getJSON('./transfer_bg.fcgi', { 'url': url }, function(data) {
-            var imgLink = 'Lagre <a href="' + data.src + '" target="_blank">filen</a> lokalt på din maskin først, og trykk så: ',
+            if (data.hasOwnProperty('error')) {
+                var emsg = "";
+                if (data.error == 'duplicate') {
+                    var url = 'http://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
+                    emsg = "Bildet er <a href=\"" + url + "\">allerede overført til commons</a>";
+                }
+                $('#theform').append('<div class="alert alert-error">' + emsg + '</div>');
+            } else {
+            var imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ',
                 d = new Date(),
                 current_year = d.getFullYear();
             src = data.src;
@@ -192,21 +207,21 @@ $(document).ready(function(){
 
             switch (license) {
                 case 'pd':
-                    var lisens = 'Bildet er falt i det fri.<ul>' +
-                        '<li>Mal for Norge: <select class="license" name="license1">' +
-                        '<option val="{{PD-Norway50}}">{{PD-Norway50}} Vanlig fotografi</option>' +
-                        '<option val="{{PD-Norway}}">{{PD-Norway}} Åndsverk</option>' +
+                    var lisens = 'Bildet er falt i det fri. (Valgene under er foreløpig ukomplette!)<ul>' +
+                        '<li>Mal for Norge: <select class="license input-xxlarge">' +
+                        '<option value="{{PD-Norway50}}">{{PD-Norway50}} Vanlig fotografi</option>' +
+                        '<option value="{{PD-Norway}}">{{PD-Norway}} Åndsverk</option>' +
                         '</select></li>';
 
-                    lisens += '<li>Mal for USA: <select class="license" name="license2"><option val="">Velg:</option>';
+                    lisens += '<li>Mal for USA: <select class="license input-xxlarge"><option value="">Velg:</option>';
                     var sel = '';
                     if (year < 1923) {
                         sel = 'selected="selected"'
                     }
-                    lisens += '<option val="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
+                    lisens += '<option value="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
                     //license = '{{PD-Norway50}}\n{{PD-1923}}';
                     
-                    lisens += '</select></li></ul><input type="button" id="license-btn" value="Ok" />';
+                    lisens += '</select></li></ul><button id="license-btn">Ok</button>';
                     $('#Lisens').html('<div class="ok">' + lisens + '</div>');
                     $('#license-btn').click(function() {
                         $('form#upload').show();
@@ -226,8 +241,14 @@ $(document).ready(function(){
                     $('#Lisens').html('<div class="fail">Klarte ikke å gjenkjenne lisensen.</div>');
             }
 
+            }
+
         });
         return false;
+    });
+
+    $('form#upload :submit').on('click', function(e) {
+        $('form#upload').attr('action', 'http://commons.wikimedia.org/w/index.php?title=Special:Upload&uploadformstyle=basic&wpDestFile=' + encodeURIComponent($("#wpDestFile").val()));
     });
 
 });

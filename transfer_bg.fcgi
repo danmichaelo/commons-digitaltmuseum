@@ -15,6 +15,7 @@ import cgi
 from cgi import escape
 from flup.server.fcgi import WSGIServer
 import mwclient
+import sqlite3
 
 formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 warn_handler = logging.FileHandler('transfer.log')
@@ -142,8 +143,19 @@ def app(environ, start_response):
 
     src = soup.find('div','image').findChild('img').get('src')
 
-
-    yield json.dumps({ 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year })
+    institution, imageid = fields['Permalenke'].split('/',4)[3:]
+    sql = sqlite3.connect('oslobilder.db')
+    sql.row_factory = sqlite3.Row
+    cur = sql.cursor()
+    rows = cur.execute(u'SELECT filename FROM files ' + \
+            'WHERE institution=? AND imageid=?', (institution, imageid)).fetchall()
+    if len(rows) > 0:
+        yield json.dumps({ 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] });
+    else:
+        yield json.dumps({ 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year })
+    
+    cur.close()
+    sql.close()
     #yield "hello"
 
     #yield '<table>'

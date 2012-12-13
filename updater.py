@@ -9,7 +9,7 @@ import logging
 import logging.handlers
 import time
 
-debug = True
+debug = False
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

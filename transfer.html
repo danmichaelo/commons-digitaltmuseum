@@ -129,29 +129,20 @@
     </table>
 </div>
 
-<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload" class="well">
-    <table id="mw-htmlform-description">
-        <tr>
-            <td>
-                Filnavn:
-            </td>
-            <td>
-                <input id="wpDestFile" />
-            </td>
-            <td class="warn">
-                <strong>Merk:</strong> 
-                    Du bør velge et mer beskrivende filnavn.
-            </td>
-        </tr>
-        <tr>
-            <td valign="top">
-                Beskrivelse:
-            </td>
-            <td colspan="2">
-                <textarea id="wpUploadDescription" style="width:100%" rows="20" name="wpUploadDescription"></textarea>
-            </td>
-        </tr>
-    </table>
+<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload" class="well form-horizontal" target="_blank">
+    <div class="control-group">
+        <label class="control-label" for="wpDestFile">Filnavn:</label>
+        <div class="controls">
+            <input id="wpDestFile" type="text" class="input-xxlarge" />
+            <span class="help-inline">Du bør velge et mer beskrivende filnavn.</span>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="wpUploadDescription">Beskrivelse:</label>
+        <div class="controls">
+            <textarea id="wpUploadDescription" style="width:100%" rows="20" name="wpUploadDescription"></textarea>
+        </div>
+    </div>
     <span id="imgLink"></span>
     <button type="submit" name="fake_upload" class="btn btn-primary">Last opp</button>
 </form>
