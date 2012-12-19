@@ -37,8 +37,9 @@
 
 <form id="theform" method="POST" class="well form-inline">
     <ol>
+        <li>Sjekk først at du er logget inn på <a href="//commons.wikimedia.org">Wikimedia Commons</a>.</li>
         <li>Lim inn adressen til et bilde på oslobilder.no og trykk Sjekk.</li>
-        <li>Scriptet sjekker om bildets lisens er ok, og trekker ut så mye som mulig informasjon om bildet og tilpasse det til Commons.</li>
+        <li>Scriptet sjekker om bildets lisens er ok, og trekker ut annen metadata.</li>
         <li>Informasjonen kan sjekkes og redigeres før opplasting, og kategorier bør legges til (emneordene kan i en del tilfeller brukes som inspirasjon, selv om de ikke er direkte overførbare)</li>
     </ol>
     <!--<label for="inputurl">URL</label>: -->
@@ -129,8 +130,10 @@
     </table>
 </div>
 
-<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload" class="well form-horizontal" target="_blank">
-    <div class="control-group">
+<form id="upload" method="post" enctype="multipart/form-data" action="http://commons.wikimedia.org/wiki/Special:Upload" class="well form-horizontal">
+    <table>
+        <tr><td colspan="2">
+                <div class="control-group">
         <label class="control-label" for="wpDestFile">Filnavn:</label>
         <div class="controls">
             <input id="wpDestFile" type="text" class="input-xxlarge" />
@@ -143,8 +146,13 @@
             <textarea id="wpUploadDescription" style="width:100%" rows="20" name="wpUploadDescription"></textarea>
         </div>
     </div>
+    </td></tr></table>
     <span id="imgLink"></span>
     <button type="submit" name="fake_upload" class="btn btn-primary">Last opp</button>
+    <p>
+    Du blir sendt til et forhåndsutfylt skjema på Commons, der du laster opp filen du har lagret på maskinen din.
+    Du kan evt. beskjære filen før du laster den opp.
+    </p>
 </form>
 
 <!--<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="/wiki/Special:Categories" title="Special:Categories">Kategorier</a>: <ul><li><a href="/wiki/Category:Media_from_oslobilder.no" title="Category:Media from oslobilder.no">Media from oslobilder.no</a></li><li><a href="/wiki/Category:Media_from_the_collection_of_Oslo_Museum" title="Category:Media from the collection of Oslo Museum">Media from the collection of Oslo Museum</a></li><li><a href="/wiki/Category:Edvard_Grieg" title="Category:Edvard Grieg">Edvard Grieg</a></li><li><a href="/wiki/Category:People_with_pianos" title="Category:People with pianos">People with pianos</a></li></ul></div><div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-user-shown">Skjult kategori: <ul><li><a href="/wiki/Category:CC-BY-SA-3.0" title="Category:CC-BY-SA-3.0">CC-BY-SA-3.0</a></li></ul></div></div>-->

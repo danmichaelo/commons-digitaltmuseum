@@ -2435,56 +2435,21 @@ window.HotCat = {
   function setup_upload () {
     onUpload = true;
     // Add an empty category bar at the end of the table containing the description, and change the onsubmit handler.
-    var ip = document.getElementById ('mw-htmlform-description') || document.getElementById ('wpDestFile');
-    if (!ip) {
-      ip = document.getElementById ('wpDestFile');
-      while (ip && ip.nodeName.toLowerCase() != 'table') ip = ip.parentNode;
-    }
-    if (!ip) return;
-    var reupload = document.getElementById ('wpForReUpload');
-    var destFile = document.getElementById ('wpDestFile');
-    if (   (reupload && !!reupload.value)
-        || (destFile && (destFile.disabled || destFile.readOnly)))
-      return; // re-upload form...
+    var ip = $('#wpUploadDescription');
+    if (ip.length == 0) return;
+    ip = ip.parent().parent();
+
     // Insert a table row with two fields (label and empty category bar)
-    var labelCell = make ('td');
-    var lineCell  = make ('td');
-    // Create the category line
-    catLine = make ('div');
-    catLine.className = 'catlinks';
-    catLine.id = 'catlinks';
-    catLine.style.textAlign = is_rtl ? 'right' : 'left';
-    // We'll be inside a table row. Make sure that we don't have margins or strange borders.
-    catLine.style.margin = '0';
-    catLine.style.border = 'none';
-    lineCell.appendChild (catLine);
-    // Create the label
-    var label = null;
-    if (   typeof (UFUI) != 'undefined'
-        && typeof (UIElements) != 'undefined'
-        && typeof (UFUI.getLabel) == 'function') {
-      try {
-        label = UFUI.getLabel ('wpCategoriesUploadLbl');
-      } catch (ex) {
-        label = null;
-      }
-    }
-    if (!label) {
-      labelCell.id = 'hotcatLabel';
-      labelCell.appendChild (make (HotCat.categories, true));
-    } else {
-      labelCell.id = 'hotcatLabelTranslated';
-      labelCell.appendChild (label);
-    }
-    labelCell.className           = 'mw-label';
-    labelCell.style.textAlign     = 'right';
-    labelCell.style.verticalAlign = 'middle';
+    var labelCell = $('<label class="control-label mw-label" id="hotcatLabel">Kategorier:</label>');
+    catLine = $('<div id="catlinks" class="catlinks"></div>')[0];
+    var html = $('<div class="control-group"><div class="controls"></div></div>');
+    html.prepend(labelCell);
+    html.find('.controls').append(catLine);
+
     // Change the onsubmit handler
     var form = document.getElementById ('upload') || document.getElementById ('mw-upload-form');
     if (form) {
-      var newRow = ip.insertRow (-1);
-      newRow.appendChild (labelCell);
-      newRow.appendChild (lineCell);
+      ip.after(html);
       form.onsubmit = (function (oldSubmit) {
         return function () {
           var do_submit = true;

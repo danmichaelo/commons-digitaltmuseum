@@ -210,7 +210,8 @@ $(document).ready(function(){
                     var lisens = 'Bildet er falt i det fri. (Valgene under er foreløpig ukomplette!)<ul>' +
                         '<li>Mal for Norge: <select class="license input-xxlarge">' +
                         '<option value="{{PD-Norway50}}">{{PD-Norway50}} Vanlig fotografi</option>' +
-                        '<option value="{{PD-Norway}}">{{PD-Norway}} Åndsverk</option>' +
+                        '<option value="{{PD-old-70}}">{{PD-old-70}} Åndsverk</option>' +
+                        '<option value="{{PD-anon-70}}">{{PD-anon-70}} Åndsverk med ukjent fotograf</option>' +
                         '</select></li>';
 
                     lisens += '<li>Mal for USA: <select class="license input-xxlarge"><option value="">Velg:</option>';
