@@ -8,7 +8,7 @@ import re
 import sys
 import os
 
-import urllib
+import urllib2
 from bs4 import BeautifulSoup
 import json
 import cgi
@@ -16,6 +16,7 @@ from cgi import escape
 from flup.server.fcgi import WSGIServer
 import mwclient
 import sqlite3
+import StringIO, gzip
 
 formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 warn_handler = logging.FileHandler('transfer.log')
@@ -48,9 +49,19 @@ def app(environ, start_response):
         yield "Invalid url!"
         return
     #yield url
-    f = urllib.urlopen(url)
-    txt = f.read()
-    soup = BeautifulSoup(txt)
+    req = urllib2.Request(url, headers={
+        'User-Agent': 'Oslobilder@Commons (+http://toolserver.org/~danmichaelo/oslobilder)',
+        'Referer': 'http://toolserver.org/~danmichaelo/oslobilder',
+        'Accept-Encoding': 'gzip'
+    })
+    f = urllib2.urlopen(req)
+    headers = f.info()
+    if headers.get('Content-Encoding') in ('gzip', 'x-gzip'):
+        data = gzip.GzipFile(fileobj=StringIO.StringIO(f.read())).read()
+    else:
+        data = f.read()
+
+    soup = BeautifulSoup(data)
     soup.find_all('p', 'copyright-info')
     tag = soup.find('p', 'copyright-info').find('a').get('href')
     license = 'unknown'
@@ -70,9 +81,10 @@ def app(environ, start_response):
     commons = mwclient.Site('commons.wikimedia.org')
 
     date_re = [
-        [re.compile(r'([0-9]{4}) - ([0-9]{4}) \(ca\)', re.I), r'{{Other date|~|\1|\2}}'],
-        [re.compile(r'([0-9]{4}) \(ca\)', re.I), r'{{Other date|~|\1}}'],
+        [re.compile(r'([0-9]{4}) - ([0-9]{4}) \(ca(\.)?\)', re.I), r'{{Other date|~|\1|\2}}'],
+        [re.compile(r'([0-9]{4}) \(ca(\.)?\)', re.I), r'{{Other date|~|\1}}'],
         [re.compile(r'([0-9]{4}) - ([0-9]{4})'), r'{{Other date|-|\1|\2}}'],
+        [re.compile(r'([0-9]{4}) \(([0-9]{2})\.([0-9]{2})\.\)'), r'\1-\3-\2}}'],
         [re.compile(r'^([0-9]{4})$'), r'\1']
         ]
 
