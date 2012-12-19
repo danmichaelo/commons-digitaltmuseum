@@ -1,44 +1,50 @@
+/*jslint browser: true */
+/*global $:false */
 
 function getQueryVariable(variable, query) {
     // http://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
+    "use strict";
+    var i, vars, pair;
     if (query === undefined) {
         query = window.location.search.substring(1);
     }
-    var vars = query.split('&');
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split('=');
-        if (decodeURIComponent(pair[0]) == variable) {
+    vars = query.split('&');
+    for (i = 0; i < vars.length; i = i + 1) {
+        pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) === variable) {
             return decodeURIComponent(pair[1]);
         }
     }
-    console.log('Query variable %s not found', variable);
+    // console.log('Query variable %s not found', variable);
 }
 
 function kortform(s) {
+    "use strict";
     switch (s.toLowerCase()) {
-        case 'oslo museum':
-            return 'OMU';
-        case 'oslo byarkiv':
-            return 'BAR';
-        case 'norsk folkemuseum':
-            return 'NF';
-        case 'arbeiderbevegelsens arkiv og bibliotek':
-            return 'ARB';
-        case 'telemuseet':
-            return 'TELE';
-        case 'teknisk museum':
-            return 'NTM';
-        case 'universitetsbiblioteket i bergen':
-            return 'UBB';
-        case 'dextra photo':
-            return 'KFS';
-        default:
-            return 'UNKNOWN';
+    case 'oslo museum':
+        return 'OMU';
+    case 'oslo byarkiv':
+        return 'BAR';
+    case 'norsk folkemuseum':
+        return 'NF';
+    case 'arbeiderbevegelsens arkiv og bibliotek':
+        return 'ARB';
+    case 'telemuseet':
+        return 'TELE';
+    case 'teknisk museum':
+        return 'NTM';
+    case 'universitetsbiblioteket i bergen':
+        return 'UBB';
+    case 'dextra photo':
+        return 'KFS';
+    default:
+        return 'UNKNOWN';
     }
 
 }
 
-$(document).ready(function(){
+$(document).ready(function () {
+    "use strict";
 
     var license, author, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src;
 
@@ -61,19 +67,19 @@ $(document).ready(function(){
     function fill_desc() {
         var imgFilename = '',
             beskrivelse = '',
-            desc = '';
-        if (motiv != "NOTFOUND") {
+            desc = '',
+            lics = $('select.license');
+        if (motiv !== "NOTFOUND") {
             beskrivelse += motiv + '.';
-        } else if (tittel != "NOTFOUND") {
+        } else if (tittel !== "NOTFOUND") {
             beskrivelse += tittel + '.';
         }
-        if (historikk != "NOTFOUND") {
+        if (historikk !== "NOTFOUND") {
             beskrivelse += ' ' + historikk + '.';
         }
-        var lics = $('select.license');
         if (lics.length > 0) {
             license = "";
-            $.each(lics, function(ind, lic) {
+            $.each(lics, function (ind, lic) {
                 license += $(lic).val() + "\n";
             });
         } else {
@@ -96,7 +102,7 @@ $(document).ready(function(){
             '',
             ''].join('\n');
         $('#wpUploadDescription').val(desc);
-        if (tittel != 'NOTFOUND') {
+        if (tittel !== 'NOTFOUND') {
             $('#Bildetittel').html(tittel);
             imgFilename = tittel;
             if (year !== 0) {
@@ -115,20 +121,21 @@ $(document).ready(function(){
         $('#wpDestFile').val(imgFilename);
     }
 
-    $('#theform').on('submit', function(e) {
+    $('#theform').on('submit', function () {
         var url = $('#inputurl').val();
-        $.getJSON('./transfer_bg.fcgi', { 'url': url }, function(data) {
+        $.getJSON('./transfer_bg.fcgi', { 'url': url }, function (data) {
+            var commons_url,
+                imgLink,
+                emsg = '',
+                avbildet = [];
             if (data.hasOwnProperty('error')) {
-                var emsg = "";
-                if (data.error == 'duplicate') {
-                    var url = 'http://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
+                if (data.error === 'duplicate') {
+                    commons_url = 'http://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
                     emsg = "Bildet er <a href=\"" + url + "\">allerede overført til commons</a>";
                 }
                 $('#theform').append('<div class="alert alert-error">' + emsg + '</div>');
             } else {
-                var imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ',
-                    d = new Date(),
-                    current_year = d.getFullYear();
+                imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ';
                 $('#theform .alert').remove();
 
                 src = data.src;
@@ -142,26 +149,26 @@ $(document).ready(function(){
                 historikk = data.metadata.Historikk;
                 motiv = data.metadata.Motiv;
                 tittel = data.metadata.Bildetittel;
-                
-                year = parseInt(data.year);
-                if (dato == 'NOTFOUND') {
+
+                year = parseInt(data.year, 10);
+                if (dato === 'NOTFOUND') {
                     dato = '{{Unknown|date}}';
                     $('#Datering').html('<em>Ukjent</em>');
                 } else {
                     $('#Datering').html(dato);
                 }
 
-                if (historikk != "NOTFOUND") {
+                if (historikk !== "NOTFOUND") {
                     $('#Historikk').html(historikk);
                 } else {
                     $('#Historikk').html('-');
                 }
-                if (tittel != 'NOTFOUND') {
+                if (tittel !== 'NOTFOUND') {
                     $('#Bildetittel').html(tittel);
                 } else {
                     $('#Bildetittel').html('-');
                 }
-                if (author != 'NOTFOUND') {
+                if (author !== 'NOTFOUND') {
                     $('#Fotograf').html(author);
                 } else {
                     author = '{{Unknown|author}}';
@@ -169,30 +176,29 @@ $(document).ready(function(){
                     $('#Fotograf').siblings('.warn').show();
 
                 }
-                if (motiv != "NOTFOUND") {
+                if (motiv !== "NOTFOUND") {
                     $('#Motiv').html(motiv);
                 } else {
                     $('#Motiv').html('-');
                 }
-                
-                var avbildet = Array();
+
                 $.each(data.metadata['Avbildet sted'].split('|'), function(i, k) {
-                    if (k != 'NOTFOUND') {
+                    if (k !== 'NOTFOUND') {
                         avbildet.push('<span class="key">' + $.trim(k) + '</span> (sted)');
                     }
                 });
                 $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
-                    if (k != 'NOTFOUND') {
+                    if (k !== 'NOTFOUND') {
                         avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
                     }
                 });
                 $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
-                    if (k != 'NOTFOUND') {
+                    if (k !== 'NOTFOUND') {
                         avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
                     }
                 });
-                var emneord = Array();
-                if (data.metadata['Emneord'] != 'NOTFOUND') {
+                var emneord = [];
+                if (data.metadata['Emneord'] !== 'NOTFOUND') {
                     $.each(data.metadata['Emneord'].split('|'), function(i, k) {
                         emneord.push('<span class="key">' + $.trim(k) + '</span>');
                     });
@@ -219,7 +225,7 @@ $(document).ready(function(){
                         lisens += '<li>Mal for USA: <select class="license input-xxlarge"><option value="">Velg:</option>';
                         var sel = '';
                         if (year < 1923) {
-                            sel = 'selected="selected"'
+                            sel = 'selected="selected"';
                         }
                         lisens += '<option value="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
                         //license = '{{PD-Norway50}}\n{{PD-1923}}';
