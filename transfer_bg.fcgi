@@ -85,7 +85,7 @@ def app(environ, start_response):
         [re.compile(r'([0-9]{4}) \(ca(\.)?\)', re.I), r'{{Other date|~|\1}}'],
         [re.compile(r'([0-9]{4}) - ([0-9]{4})'), r'{{Other date|-|\1|\2}}'],
         [re.compile(r'([0-9]{4}) \(([0-9]{2})\.([0-9]{2})\.\)'), r'\1-\3-\2}}'],
-        [re.compile(r'^([0-9]{4}) \(ANT\)$'), r'\1 (assumed)']
+        [re.compile(r'^([0-9]{4}) \(ANT\)$'), r'\1 (assumed)'],
         [re.compile(r'^([0-9]{4})$'), r'\1']
         ]
 
