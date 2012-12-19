@@ -126,121 +126,123 @@ $(document).ready(function(){
                 }
                 $('#theform').append('<div class="alert alert-error">' + emsg + '</div>');
             } else {
-            var imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ',
-                d = new Date(),
-                current_year = d.getFullYear();
-            src = data.src;
-            license = data.license;
-            author = data.metadata.Fotograf;
-            dato = data.metadata.Datering;
-            institusjon = data.metadata.Eierinstitusjon;
-            inst = kortform(institusjon);
-            bildenr = data.metadata.Bildenummer;
-            samling = data.metadata['Arkiv/Samling'];
-            historikk = data.metadata.Historikk;
-            motiv = data.metadata.Motiv;
-            tittel = data.metadata.Bildetittel;
-            
-            year = parseInt(data.year);
-            if (dato == 'NOTFOUND') {
-                dato = '{{Unknown|date}}';
-                $('#Datering').html('<em>Ukjent</em>');
-            } else {
-                $('#Datering').html(dato);
-            }
+                var imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ',
+                    d = new Date(),
+                    current_year = d.getFullYear();
+                $('#theform .alert').remove();
 
-            if (historikk != "NOTFOUND") {
-                $('#Historikk').html(historikk);
-            } else {
-                $('#Historikk').html('-');
-            }
-            if (tittel != 'NOTFOUND') {
-                $('#Bildetittel').html(tittel);
-            } else {
-                $('#Bildetittel').html('-');
-            }
-            if (author != 'NOTFOUND') {
-                $('#Fotograf').html(author);
-            } else {
-                author = '{{Unknown|author}}';
-                //$('#Fotograf').html('<span class="warning">Uh oh, fant ikke bildets fotograf! Sjekk om fotografens navn kan være oppgitt i det grå feltet nederst på selve bildet.</span>');
-                $('#Fotograf').siblings('.warn').show();
-
-            }
-            if (motiv != "NOTFOUND") {
-                $('#Motiv').html(motiv);
-            } else {
-                $('#Motiv').html('-');
-            }
-            
-            var avbildet = Array();
-            $.each(data.metadata['Avbildet sted'].split('|'), function(i, k) {
-                if (k != 'NOTFOUND') {
-                    avbildet.push('<span class="key">' + $.trim(k) + '</span> (sted)');
+                src = data.src;
+                license = data.license;
+                author = data.metadata.Fotograf;
+                dato = data.metadata.Datering;
+                institusjon = data.metadata.Eierinstitusjon;
+                inst = kortform(institusjon);
+                bildenr = data.metadata.Bildenummer;
+                samling = data.metadata['Arkiv/Samling'];
+                historikk = data.metadata.Historikk;
+                motiv = data.metadata.Motiv;
+                tittel = data.metadata.Bildetittel;
+                
+                year = parseInt(data.year);
+                if (dato == 'NOTFOUND') {
+                    dato = '{{Unknown|date}}';
+                    $('#Datering').html('<em>Ukjent</em>');
+                } else {
+                    $('#Datering').html(dato);
                 }
-            });
-            $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
-                if (k != 'NOTFOUND') {
-                    avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
+
+                if (historikk != "NOTFOUND") {
+                    $('#Historikk').html(historikk);
+                } else {
+                    $('#Historikk').html('-');
                 }
-            });
-            $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
-                if (k != 'NOTFOUND') {
-                    avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
+                if (tittel != 'NOTFOUND') {
+                    $('#Bildetittel').html(tittel);
+                } else {
+                    $('#Bildetittel').html('-');
                 }
-            });
-            var emneord = Array();
-            if (data.metadata['Emneord'] != 'NOTFOUND') {
-                $.each(data.metadata['Emneord'].split('|'), function(i, k) {
-                    emneord.push('<span class="key">' + $.trim(k) + '</span>');
-                });
-            }
-            $('#Avbildet').html(avbildet.join(' '));
-            $('#Emneord').html(emneord.join(' '));
-            $('#imgLink').html(imgLink);
-            
-            $('div#info').show();
+                if (author != 'NOTFOUND') {
+                    $('#Fotograf').html(author);
+                } else {
+                    author = '{{Unknown|author}}';
+                    //$('#Fotograf').html('<span class="warning">Uh oh, fant ikke bildets fotograf! Sjekk om fotografens navn kan være oppgitt i det grå feltet nederst på selve bildet.</span>');
+                    $('#Fotograf').siblings('.warn').show();
 
-            //if (current_year - year > 100) {
-            //    license = 'pd-old-100';
-            //}
-
-            switch (license) {
-                case 'pd':
-                    var lisens = 'Bildet er falt i det fri. (Valgene under er foreløpig ukomplette!)<ul>' +
-                        '<li>Mal for Norge: <select class="license input-xxlarge">' +
-                        '<option value="{{PD-Norway50}}">{{PD-Norway50}} Vanlig fotografi</option>' +
-                        '<option value="{{PD-old-70}}">{{PD-old-70}} Åndsverk</option>' +
-                        '<option value="{{PD-anon-70}}">{{PD-anon-70}} Åndsverk med ukjent fotograf</option>' +
-                        '</select></li>';
-
-                    lisens += '<li>Mal for USA: <select class="license input-xxlarge"><option value="">Velg:</option>';
-                    var sel = '';
-                    if (year < 1923) {
-                        sel = 'selected="selected"'
+                }
+                if (motiv != "NOTFOUND") {
+                    $('#Motiv').html(motiv);
+                } else {
+                    $('#Motiv').html('-');
+                }
+                
+                var avbildet = Array();
+                $.each(data.metadata['Avbildet sted'].split('|'), function(i, k) {
+                    if (k != 'NOTFOUND') {
+                        avbildet.push('<span class="key">' + $.trim(k) + '</span> (sted)');
                     }
-                    lisens += '<option value="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
-                    //license = '{{PD-Norway50}}\n{{PD-1923}}';
-                    
-                    lisens += '</select></li></ul><button id="license-btn">Ok</button>';
-                    $('#Lisens').html('<div class="ok">' + lisens + '</div>');
-                    $('#license-btn').click(function() {
+                });
+                $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
+                    if (k != 'NOTFOUND') {
+                        avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
+                    }
+                });
+                $.each(data.metadata['Utsikt over'].split('|'), function(i, k) {
+                    if (k != 'NOTFOUND') {
+                        avbildet.push('<span class="key">' + $.trim(k) + '</span> (utsikt over)');
+                    }
+                });
+                var emneord = Array();
+                if (data.metadata['Emneord'] != 'NOTFOUND') {
+                    $.each(data.metadata['Emneord'].split('|'), function(i, k) {
+                        emneord.push('<span class="key">' + $.trim(k) + '</span>');
+                    });
+                }
+                $('#Avbildet').html(avbildet.join(' '));
+                $('#Emneord').html(emneord.join(' '));
+                $('#imgLink').html(imgLink);
+                
+                $('div#info').show();
+
+                //if (current_year - year > 100) {
+                //    license = 'pd-old-100';
+                //}
+
+                switch (license) {
+                    case 'pd':
+                        var lisens = 'Bildet er falt i det fri. (Valgene under er foreløpig ukomplette!)<ul>' +
+                            '<li>Mal for Norge: <select class="license input-xxlarge">' +
+                            '<option value="{{PD-Norway50}}">{{PD-Norway50}} Vanlig fotografi</option>' +
+                            '<option value="{{PD-old-70}}">{{PD-old-70}} Åndsverk</option>' +
+                            '<option value="{{PD-anon-70}}">{{PD-anon-70}} Åndsverk med ukjent fotograf</option>' +
+                            '</select></li>';
+
+                        lisens += '<li>Mal for USA: <select class="license input-xxlarge"><option value="">Velg:</option>';
+                        var sel = '';
+                        if (year < 1923) {
+                            sel = 'selected="selected"'
+                        }
+                        lisens += '<option value="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
+                        //license = '{{PD-Norway50}}\n{{PD-1923}}';
+                        
+                        lisens += '</select></li></ul><button id="license-btn">Ok</button>';
+                        $('#Lisens').html('<div class="ok">' + lisens + '</div>');
+                        $('#license-btn').click(function() {
+                            $('form#upload').show();
+                            fill_desc();
+                        });
+                        break;
+                    case 'by-sa':
+                        $('#Lisens').html('<div class="ok">CC-BY-SA er en <a href="//commons.wikimedia.org/wiki/Commons:Licensing">akseptabel lisens</a>.</div>');
+                        license = 'cc-by-sa-3.0';
                         $('form#upload').show();
                         fill_desc();
-                    });
-                    break;
-                case 'by-sa':
-                    $('#Lisens').html('<div class="ok">CC-BY-SA er en <a href="//commons.wikimedia.org/wiki/Commons:Licensing">akseptabel lisens</a>.</div>');
-                    license = 'cc-by-sa-3.0';
-                    $('form#upload').show();
-                    fill_desc();
-                    break;
-                case 'by-nc-nd':
-                    $('#Lisens').html('<div class="fail">CC-BY-NC-ND er ikke en <a href="//commons.wikimedia.org/wiki/Commons:Licensing">akseptabel lisens</a>.</div>');
-                    return;
-                default:
-                    $('#Lisens').html('<div class="fail">Klarte ikke å gjenkjenne lisensen.</div>');
-            }
+                        break;
+                    case 'by-nc-nd':
+                        $('#Lisens').html('<div class="fail">CC-BY-NC-ND er ikke en <a href="//commons.wikimedia.org/wiki/Commons:Licensing">akseptabel lisens</a>.</div>');
+                        return;
+                    default:
+                        $('#Lisens').html('<div class="fail">Klarte ikke å gjenkjenne lisensen.</div>');
+                }
 
             }
 
