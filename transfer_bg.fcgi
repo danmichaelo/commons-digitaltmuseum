@@ -29,25 +29,8 @@ cgitb.enable()
 
 from config import fieldnames
 
-def app(environ, start_response):
-
+def check_url(url):
     logger = logging.getLogger()
-    logger.setLevel(logging.WARNING)
-    logger.addHandler(warn_handler)
-
-    start_response('200 OK', [('Content-Type', 'text/html')])
-    form = cgi.FieldStorage(fp = environ['wsgi.input'], environ = environ)
-    #yield form.keys()
-    if 'url' not in form:
-        yield '????'
-        return
-
-    #yield '<h1>FastCGI Environment</h1>'
-    #yield escape(environ.post('url'))
-    url = form.getfirst('url')
-    if not re.match(r'http://(www\.)?oslobilder\.no', url):
-        yield "Invalid url!"
-        return
     #yield url
     req = urllib2.Request(url, headers={
         'User-Agent': 'Oslobilder@Commons (+http://toolserver.org/~danmichaelo/oslobilder)',
@@ -63,7 +46,12 @@ def app(environ, start_response):
 
     soup = BeautifulSoup(data)
     soup.find_all('p', 'copyright-info')
-    tag = soup.find('p', 'copyright-info').find('a').get('href')
+    try:
+        tag = soup.find('p', 'copyright-info').find('a').get('href')
+    except AttributeError:
+        logger.warn('No license info (URL: %s)', url)
+        return { 'error': 'Bildet inneholder ingen lisensinformasjon' }
+
     license = 'unknown'
     if tag.find('licenses/by-sa/') != -1:
         license = 'by-sa'
@@ -135,7 +123,7 @@ def app(environ, start_response):
                     tmp = r3.sub(r'\2 \1', tmp)
                     val += '\n' + tmp
                     cats.append(val)
-            elif fn == 'Fotograf':
+            elif fn == 'Fotograf' or fn == 'Kunstner':
                 vals = val.split(',')
                 if len(vals) == 2:
                     last = vals[0].strip()
@@ -163,9 +151,9 @@ def app(environ, start_response):
     rows = cur.execute(u'SELECT filename FROM files ' + \
             'WHERE institution=? AND imageid=?', (institution, imageid)).fetchall()
     if len(rows) > 0:
-        yield json.dumps({ 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] });
+        return { 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] }
     else:
-        yield json.dumps({ 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year })
+        return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year }
     
     cur.close()
     sql.close()
@@ -175,6 +163,28 @@ def app(environ, start_response):
     #for k, v in sorted(environ.items()):
          #yield '<tr><th>%s</th><td>%s</td></tr>' % (escape(k), escape(v))
     #yield '</table>'
+
+def app(environ, start_response):
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+    logger.addHandler(warn_handler)
+
+    try:
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        form = cgi.FieldStorage(fp = environ['wsgi.input'], environ = environ)
+        if 'url' not in form:
+            yield '????'
+            return
+        url = form.getfirst('url')
+        if not re.match(r'http://(www\.)?oslobilder\.no', url):
+            yield "Invalid url!"
+            return
+        yield json.dumps(check_url(url))
+    except Exception as e:
+        logging.exception(e)
+        raise
+
 
 WSGIServer(app).run()
 

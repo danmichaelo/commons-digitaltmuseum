@@ -34,4 +34,4 @@ columns = [
 fieldnames = ['Bildetittel', 'Motiv', 'Datering', 'Fotograf', 'Avbildet person', 
               'Avbildet sted', 'Utsikt over', 'Utgiver', 'Permalenke',
               'Emneord', 'Bildenummer', 'Historikk', 
-              'Permalenke', 'Eierinstitusjon', 'Arkiv/Samling']
+              'Permalenke', 'Eierinstitusjon', 'Arkiv/Samling', 'Kunstner', 'Tittel']

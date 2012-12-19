@@ -46,7 +46,7 @@ function kortform(s) {
 $(document).ready(function () {
     "use strict";
 
-    var license, author, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src;
+    var license, fotograf, kunstner, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src;
 
     $('div#info').hide();
     $('form#upload').hide();
@@ -85,27 +85,40 @@ $(document).ready(function () {
         } else {
             license = '{{' + license + '}}';
         }
-        desc = ['',
-            '=={{int:filedesc}}==',
-            '{{Information',
-            '|description = {{no|1=' + beskrivelse + '}}',
-            '|source = {{Oslobilder|' + inst + '|' + bildenr + '|collection=' + samling + '}}',
-            '|author = ' + author,
-            '|date = ' + dato,
-            '|permission = ',
-            '|other_versions = ',
-            '|other_fields = ',
-            '}}',
-            '',
-            '=={{int:license-header}}==',
-            license,
-            '',
-            ''].join('\n');
+        desc = ['', '=={{int:filedesc}}=='];
+        if (kunstner !== 'NOTFOUND') {
+            desc.push('{{Artwork',
+                '|description = {{no|1=' + beskrivelse + '}}',
+                '|source = {{Oslobilder|' + inst + '|' + bildenr + '|collection=' + samling + '}}',
+                '|date = ' + dato,
+                '|artist = ' + kunstner,
+                '|title = ' + tittel,
+                '|medium = ',
+                '|dimensions = ',
+                '|institutions = ',
+                '|location = ',
+                '|permission = ',
+                '|other_versions = ',
+                '|other_fields = ',
+                '}}');
+        } else {
+            desc.push('{{Information',
+                '|description = {{no|1=' + beskrivelse + '}}',
+                '|source = {{Oslobilder|' + inst + '|' + bildenr + '|collection=' + samling + '}}',
+                '|author = ' + fotograf,
+                '|date = ' + dato,
+                '|permission = ',
+                '|other_versions = ',
+                '|other_fields = ',
+                '}}');
+        }
+        desc.push('', '=={{int:license-header}}==', license, '', '');
+        desc = desc.join('\n');
         $('#wpUploadDescription').val(desc);
-        if (tittel !== 'NOTFOUND') {
+        if (tittel !== '') {
             $('#Bildetittel').html(tittel);
             imgFilename = tittel;
-            if (year !== 0) {
+            if (!isNaN(year)) {
                 imgFilename += ' (' + year + ')';
             }
             imgFilename += '.jpg';
@@ -122,25 +135,34 @@ $(document).ready(function () {
     }
 
     $('#theform').on('submit', function () {
-        var url = $('#inputurl').val();
-        $.getJSON('./transfer_bg.fcgi', { 'url': url }, function (data) {
+
+        $.get('./transfer_bg.fcgi', { 'url': $('#inputurl').val() }, function (data, textStatus, jqXHR) {
             var commons_url,
                 imgLink,
                 emsg = '',
                 avbildet = [];
+            try {
+                data = $.parseJSON(data);
+            } catch (e) {
+                data = { error: data };
+            }
+            $('#theform .alert').remove();
+
             if (data.hasOwnProperty('error')) {
                 if (data.error === 'duplicate') {
                     commons_url = 'http://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
-                    emsg = "Bildet er <a href=\"" + url + "\">allerede overført til commons</a>";
+                    emsg = "Bildet er <a href=\"" + commons_url + "\">allerede overført til commons</a>";
+                } else {
+                    emsg = data.error;
                 }
                 $('#theform').append('<div class="alert alert-error">' + emsg + '</div>');
             } else {
                 imgLink = 'Lagre <strong><a href="' + data.src + '" target="_blank">filen</a></strong> lokalt på din maskin først (høyreklikk og Lagre som...), og trykk deretter: ';
-                $('#theform .alert').remove();
 
                 src = data.src;
                 license = data.license;
-                author = data.metadata.Fotograf;
+                fotograf = data.metadata.Fotograf;
+                kunstner = data.metadata.Kunstner;
                 dato = data.metadata.Datering;
                 institusjon = data.metadata.Eierinstitusjon;
                 inst = kortform(institusjon);
@@ -148,7 +170,13 @@ $(document).ready(function () {
                 samling = data.metadata['Arkiv/Samling'];
                 historikk = data.metadata.Historikk;
                 motiv = data.metadata.Motiv;
-                tittel = data.metadata.Bildetittel;
+                if (data.metadata.Bildetittel !== 'NOTFOUND') {
+                    tittel = data.metadata.Bildetittel;
+                } else if (data.metadata.Tittel !== 'NOTFOUND') {
+                    tittel = data.metadata.Tittel;
+                } else {
+                    tittel = "";
+                }
 
                 year = parseInt(data.year, 10);
                 if (dato === 'NOTFOUND') {
@@ -163,15 +191,17 @@ $(document).ready(function () {
                 } else {
                     $('#Historikk').html('-');
                 }
-                if (tittel !== 'NOTFOUND') {
+                if (tittel !== '') {
                     $('#Bildetittel').html(tittel);
                 } else {
                     $('#Bildetittel').html('-');
                 }
-                if (author !== 'NOTFOUND') {
-                    $('#Fotograf').html(author);
+                if (fotograf !== 'NOTFOUND') {
+                    $('#Fotograf').html(fotograf);
+                } else if (kunstner !== 'NOTFOUND') {
+                    $('#Fotograf').html(kunstner);
                 } else {
-                    author = '{{Unknown|author}}';
+                    fotograf = '{{Unknown|author}}';
                     //$('#Fotograf').html('<span class="warning">Uh oh, fant ikke bildets fotograf! Sjekk om fotografens navn kan være oppgitt i det grå feltet nederst på selve bildet.</span>');
                     $('#Fotograf').siblings('.warn').show();
 
@@ -252,7 +282,11 @@ $(document).ready(function () {
 
             }
 
+        }).error(function() { 
+            $('#theform .alert').remove();
+            $('#theform').append('<div class="alert alert-error">Nettverksproblem</div>');
         });
+
         return false;
     });
 
