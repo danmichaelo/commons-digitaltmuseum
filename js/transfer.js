@@ -46,7 +46,7 @@ function kortform(s) {
 $(document).ready(function () {
     "use strict";
 
-    var license, fotograf, kunstner, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src;
+    var license, fotograf, kunstner, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src, hostname, thing;
 
     $('div#info').hide();
     $('form#upload').hide();
@@ -68,7 +68,8 @@ $(document).ready(function () {
         var imgFilename = '',
             beskrivelse = '',
             desc = '',
-            lics = $('select.license');
+            lics = $('select.license'),
+            srcTemplate = '';
         if (motiv !== "NOTFOUND") {
             beskrivelse += motiv + '.';
         } else if (tittel !== "NOTFOUND") {
@@ -86,10 +87,17 @@ $(document).ready(function () {
             license = '{{' + license + '}}';
         }
         desc = ['', '=={{int:filedesc}}=='];
+
+        if (hostname == 'oslobilder') {
+            srcTemplate = '{{Oslobilder|' + inst + '|' + bildenr + '|' + samling + '}}';
+        } else {
+            srcTemplate = '{{DigitaltMuseum|' + inst + '|' + bildenr + '|' + samling + '|thing=' + thing + '}}';
+        }
+
         if (kunstner !== 'NOTFOUND') {
             desc.push('{{Artwork',
                 '|description = {{no|1=' + beskrivelse + '}}',
-                '|source = {{Oslobilder|' + inst + '|' + bildenr + '|collection=' + samling + '}}',
+                '|source = ' + srcTemplate,
                 '|date = ' + dato,
                 '|artist = ' + kunstner,
                 '|title = ' + tittel,
@@ -104,7 +112,7 @@ $(document).ready(function () {
         } else {
             desc.push('{{Information',
                 '|description = {{no|1=' + beskrivelse + '}}',
-                '|source = {{Oslobilder|' + inst + '|' + bildenr + '|collection=' + samling + '}}',
+                '|source = ' + srcTemplate,
                 '|author = ' + fotograf,
                 '|date = ' + dato,
                 '|permission = ',
@@ -161,13 +169,24 @@ $(document).ready(function () {
 
                 src = data.src;
                 license = data.license;
+                hostname = data.hostname;
+                thing = data.thing;
                 fotograf = data.metadata.Fotograf;
                 kunstner = data.metadata.Kunstner;
                 dato = data.metadata.Datering;
                 institusjon = data.metadata.Eierinstitusjon;
+                if (institusjon == 'NOTFOUND') {
+                    institusjon = data.metadata.Eier;
+                }
                 inst = kortform(institusjon);
                 bildenr = data.metadata.Bildenummer;
+                if (bildenr == 'NOTFOUND') {
+                    bildenr = data.metadata['Identifikasjonsnr.'];
+                }
                 samling = data.metadata['Arkiv/Samling'];
+                if (samling == 'NOTFOUND') {
+                    samling = data.metadata['Inngår i samling'];
+                }
                 historikk = data.metadata.Historikk;
                 motiv = data.metadata.Motiv;
                 if (data.metadata.Bildetittel !== 'NOTFOUND') {

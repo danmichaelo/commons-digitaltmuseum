@@ -9,7 +9,7 @@ import logging
 import logging.handlers
 import time
 
-debug = False
+debug = True
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -67,8 +67,10 @@ for img in page.embeddedin(namespace=6):
         tpl = te.templates['information'][0]
     elif 'artwork' in te.templates:
         tpl = te.templates['artwork'][0]
+    elif 'photograph' in te.templates:
+        tpl = te.templates['photograph'][0]
     else:
-        logger.warning('[[%s]] %s', filename, 'Did not find {{information}} or {{artwork}}-templates!')
+        logger.warning('[[File:%s]] %s', filename, 'Did not find {{information}} or {{artwork}}-templates!')
         continue
     
     if 'description' in tpl.parameters:
@@ -77,7 +79,7 @@ for img in page.embeddedin(namespace=6):
         desc = tpl.parameters['Description']
     else:
         desc = ''
-        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |description=')
+        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |description=')
         continue
 
     if 'date' in tpl.parameters:
@@ -86,7 +88,7 @@ for img in page.embeddedin(namespace=6):
         date = tpl.parameters['Date']
     else:
         date = ''
-        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |date=')
+        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |date=')
         continue
     
     if 'source' in tpl.parameters:
@@ -95,22 +97,42 @@ for img in page.embeddedin(namespace=6):
         source = tpl.parameters['Source']
     else:
         source = ''
-        logger.warning('[[%s]] %s', filename, '{{information}} does not contain |source=')
+        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |source=')
         continue
 
     if 'author' in tpl.parameters:
         author = tpl.parameters['author']
     elif 'Author' in tpl.parameters:
         author = tpl.parameters['Author']
+    elif 'photographer' in tpl.parameters:
+        author = tpl.parameters['photographer']
+    elif 'Photographer' in tpl.parameters:
+        author = tpl.parameters['Photographer']
+    elif 'artist' in tpl.parameters:
+        author = tpl.parameters['artist']
+    elif 'Artist' in tpl.parameters:
+        author = tpl.parameters['Artist']
     else:
         author = ''
-        logger.warning('[[%s]] %s', (filename, '{{information}} does not contain |author='))
+        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |author=')
         continue
 
     data = { 'filename': filename, 'width': width, 'height': height, 'size': size, 
              'institution': institution, 'imageid': imageid, 'collection': collection, 
              'author': author, 'source': source, 'date': date, 'description': desc, 
              'revision': revid }
+    
+    firstrev = img.revisions(limit=1, dir='newer').next()
+
+    rows = cur.execute(u'SELECT * FROM files WHERE NOT(institution=? AND imageid=?) AND first_revision=?', [institution, imageid, firstrev['revid']]).fetchall()
+    if rows:
+        row = rows[0]
+        logger.info('[[File:%s]] Identification changed from %s/%s to %s/%s' % (filename, row['institution'], row['imageid'], institution, imageid))
+        try:
+            cur.execute(u'UPDATE files SET institution=?, imageid=? WHERE first_revision=?', [institution, imageid, firstrev['revid']])
+            sql.commit()
+        except sqlite3.integrityerror as e:
+            logger.error('[[File:%s]] was not saved. error: %s. query: %s', filename, e.message, query)
 
     rows = cur.execute(u'SELECT * FROM files ' + \
             'WHERE institution=? AND imageid=?', (institution, imageid)).fetchall()
@@ -120,7 +142,6 @@ for img in page.embeddedin(namespace=6):
             if row['revision'] == revid:
                 found = True
             else:
-                firstrev = img.revisions(limit=1, dir='newer').next()
                 if firstrev['revid'] == row['first_revision']:
                     found = True
                     logger.info('Image was updated: %s/%s', institution, imageid)
@@ -139,8 +160,9 @@ for img in page.embeddedin(namespace=6):
                     try:
                         cur.execute(query, val)
                     except sqlite3.IntegrityError as e:
-                        logger.error('[[%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
+                        logger.error('[[File:%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
                     sql.commit()
+    
 
         if not found:
             logger.warning('[[File:%s]] shares the identification %s/%s with [[File:%s]]', filename, institution, imageid, row['filename'])
@@ -155,7 +177,7 @@ for img in page.embeddedin(namespace=6):
             try:
                 cur.execute(query, val)
             except sqlite3.IntegrityError as e:
-                logger.error('[[%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
+                logger.error('[[File:%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
             sql.commit()
 
     else:
@@ -178,7 +200,7 @@ for img in page.embeddedin(namespace=6):
             try:
                 cur.execute(query, val)
             except sqlite3.IntegrityError as e:
-                logger.error('[[%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
+                logger.error('[[File:%s]] was not saved. Error: %s. Query: %s', filename, e.message, query)
             sql.commit()
 
         else:
@@ -270,7 +292,7 @@ if len(in_db) != len(in_db_set):
 elif len(on_commons) != len(on_commons_set):
     logger.error("Data integrity error! len(on_commons) = %d != len(on_commons_set) = %d", len(on_commons), len(on_commons_set))
 elif on_commons_set.difference(in_db_set):
-    logger.error("Data integrity error! The following images on commons was not found in the DB: %s", unicode(list(on_commons_set.difference(in_db_set))))
+    logger.error("Data integrity error! The following images on commons was not found in the DB: %s", ', '.join(list(on_commons_set.difference(in_db_set))))
     print type(in_db[0]), type(on_commons[0])
 else:
     for filename in list(in_db_set.difference(on_commons_set)):

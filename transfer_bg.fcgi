@@ -29,8 +29,17 @@ cgitb.enable()
 
 from config import fieldnames
 
-def check_url(url):
+def check_url(url, hostname):
     logger = logging.getLogger()
+
+    thing = ''
+    if hostname == 'digitaltmuseum':
+        us = url.split('/')
+        if not us[3] == 'things':
+            logger.warn('Unknown URL: %s' % url)
+            return 'unknown url'
+        thing = us[4]
+
     #yield url
     req = urllib2.Request(url, headers={
         'User-Agent': 'Oslobilder@Commons (+http://toolserver.org/~danmichaelo/oslobilder)',
@@ -45,13 +54,22 @@ def check_url(url):
         data = f.read()
 
     soup = BeautifulSoup(data)
-    soup.find_all('p', 'copyright-info')
-    try:
-        tag = soup.find('p', 'copyright-info').find('a').get('href')
-    except AttributeError:
+    commons = mwclient.Site('commons.wikimedia.org')
+    
+    # Find license info:
+
+    cp = soup.find_all('p', 'copyright-info')
+    if len(cp) == 0:
+        cp = soup.find_all('p', 'copyright')
+    if len(cp) == 0:
         logger.warn('No license info (URL: %s)', url)
         return { 'error': 'Bildet inneholder ingen lisensinformasjon' }
-
+    else:
+        try:
+            tag = cp[0].find('a').get('href')
+        except AttributeError:
+            logger.warn('No license info (URL: %s)', url)
+            return { 'error': 'Bildet inneholder ingen lisensinformasjon' }
     license = 'unknown'
     if tag.find('licenses/by-sa/') != -1:
         license = 'by-sa'
@@ -61,18 +79,18 @@ def check_url(url):
         license = 'pd'
     else:
         logger.warn('Found unknown license: "%s" (URL: %s)', tag, url)
-    year = ''
 
+    # Find other metadata:
+
+    year = ''
     fields = {}
     cats = []
-    
-    commons = mwclient.Site('commons.wikimedia.org')
 
     date_re = [
         [re.compile(r'([0-9]{4}) - ([0-9]{4}) \(ca(\.)?\)', re.I), r'{{Other date|~|\1|\2}}'],
         [re.compile(r'([0-9]{4}) \(ca(\.)?\)', re.I), r'{{Other date|~|\1}}'],
         [re.compile(r'([0-9]{4}) - ([0-9]{4})'), r'{{Other date|-|\1|\2}}'],
-        [re.compile(r'([0-9]{4}) \(([0-9]{2})\.([0-9]{2})\.\)'), r'\1-\3-\2}}'],
+        [re.compile(r'([0-9]{4}) \(([0-9]{2})\.([0-9]{2})\.\)'), r'\1-\3-\2'],
         [re.compile(r'^([0-9]{4}) \(ANT\)$'), r'\1 (assumed)'],
         [re.compile(r'^([0-9]{4})$'), r'\1']
         ]
@@ -98,7 +116,15 @@ def check_url(url):
             #yield "Fant ikke feltet %s" % fn
             #return
         else:
-            val = tag.findNext('dd').find('div').text.strip().rstrip('.')
+            val = tag.findNext('dd')
+            if val == None:
+                fields[fn] = 'NOTFOUND'
+                continue
+
+            if val.find('div') != None:
+                val = val.find('div')
+
+            val = val.text.strip().rstrip('.')
             if fn == 'Datering':
                 matched = False
                 for pattern, replacement in date_re:
@@ -142,9 +168,26 @@ def check_url(url):
                     
             fields[fn] = val
 
-    src = soup.find('div','image').findChild('img').get('src')
+    # Find image source URL
 
-    institution, imageid = fields['Permalenke'].split('/',4)[3:]
+    src = soup.find('li', id='downloadpicture')
+    if src != None:
+        src = 'http://' + hostname + '.no' + src.find('a').get('href')
+    else:
+        src = soup.find('div','image').findChild('img').get('src')
+
+    # Find institution and image identification
+
+    if fields['Permalenke'] != 'NOTFOUND':
+        institution, imageid = fields['Permalenke'].split('/',4)[3:]
+    elif fields['Eier'] != 'NOTFOUND' and fields['Identifikasjonsnr.'] != 'NOTFOUND':
+        institution = fields['Eier']
+        imageid = fields['Identifikasjonsnr.']
+    else:
+        return { 'error': 'unknown_institution', 'metadata': fields }
+
+    # Check if image has already been transferred
+
     sql = sqlite3.connect('oslobilder.db')
     sql.row_factory = sqlite3.Row
     cur = sql.cursor()
@@ -153,7 +196,7 @@ def check_url(url):
     if len(rows) > 0:
         return { 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] }
     else:
-        return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year }
+        return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year, 'hostname': hostname, 'thing': thing }
     
     cur.close()
     sql.close()
@@ -177,10 +220,16 @@ def app(environ, start_response):
             yield '????'
             return
         url = form.getfirst('url')
-        if not re.match(r'http://(www\.)?oslobilder\.no', url):
+        #hostname = re.match(r'http://(www\.)?(oslobilder)\.no', url)
+        hostname = re.match(r'http(s)?://(www\.)?([a-z]*?)\.no', url)
+        if hostname == None:
             yield "Invalid url!"
             return
-        yield json.dumps(check_url(url))
+        hostname = hostname.group(3)
+        if hostname != 'oslobilder' and hostname != 'digitaltmuseum':
+            yield "Invalid url!"
+            return
+        yield json.dumps(check_url(url, hostname))
     except Exception as e:
         logging.exception(e)
         raise
