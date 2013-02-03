@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ## -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
 
+import os
 import mwclient
 import sqlite3
 import time, datetime
@@ -8,8 +9,10 @@ from danmicholoparser import TemplateEditor
 import logging
 import logging.handlers
 import time
+import oursql
 
 debug = True
+runstart = datetime.datetime.now()
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -41,11 +44,29 @@ sql = sqlite3.connect('oslobilder.db')
 sql.row_factory = sqlite3.Row
 cur = sql.cursor()
 
+db = oursql.connect(db='commonswiki_p',
+    host='commonswiki-p.rrdb.toolserver.org',
+    read_default_file=os.path.expanduser('~/.my.cnf'),
+    charset=None,
+    use_unicode=False
+)
+ccur = db.cursor()
+
 on_commons = []
-for img in page.embeddedin(namespace=6):
-    filename = img.page_title
+ccur.execute('SELECT page.page_title, max(revision.rev_id) FROM page, templatelinks LEFT JOIN revision ON templatelinks.tl_from=revision.rev_page WHERE templatelinks.tl_namespace=10 AND templatelinks.tl_title=? AND templatelinks.tl_from=page.page_id AND page.page_namespace=6 GROUP BY revision.rev_page', [page.page_title.encode('utf-8')])
+for crow in ccur:
+
+    filename = crow[0].replace('_', ' ').decode('utf-8')
     on_commons.append(filename)
+    lastrev = crow[1]
+
+    rows = cur.execute(u'SELECT * FROM files WHERE revision=?', [lastrev]).fetchall()
+    if rows:
+        continue
+
     #print filename
+    img = commons.images[filename]
+
     width = img.imageinfo['width']
     height = img.imageinfo['height']
     size = img.imageinfo['size']
@@ -70,7 +91,7 @@ for img in page.embeddedin(namespace=6):
     elif 'photograph' in te.templates:
         tpl = te.templates['photograph'][0]
     else:
-        logger.warning('[[File:%s]] %s', filename, 'Did not find {{information}} or {{artwork}}-templates!')
+        logger.warning('[[File:%s]] %s', filename, 'Did not find any of the following templates: {{information}}, {{artwork}}, {{photograph}}')
         continue
     
     if 'description' in tpl.parameters:
@@ -79,7 +100,7 @@ for img in page.embeddedin(namespace=6):
         desc = tpl.parameters['Description']
     else:
         desc = ''
-        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |description=')
+        #logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |description=')
         continue
 
     if 'date' in tpl.parameters:
@@ -114,7 +135,7 @@ for img in page.embeddedin(namespace=6):
         author = tpl.parameters['Artist']
     else:
         author = ''
-        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |author=')
+        logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |author= or |artist= or |photographer=')
         continue
 
     data = { 'filename': filename, 'width': width, 'height': height, 'size': size, 
@@ -144,19 +165,23 @@ for img in page.embeddedin(namespace=6):
             else:
                 if firstrev['revid'] == row['first_revision']:
                     found = True
-                    logger.info('Image was updated: %s/%s', institution, imageid)
+                    logger.info('UPDATED [[File:%s]]', filename)
                     para = []
                     val = []
                     for k,v in data.iteritems():
                         if v != row[k]:
-                            logger.info('    %s: %s -> %s', k, row[k], v)
+                            oldval = row[k]
+                            if type(oldval) == unicode and len(oldval) > 20:
+                                oldval = oldval[:18] + '...'
+                            newval = v
+                            if type(newval) == unicode and len(newval) > 20:
+                                newval = newval[:18] + '...'
+                            logger.info('    %s: %s -> %s', k, oldval, newval)
                             para.append('%s=?' % k)
                             val.append(v)
                     val.append(institution)
                     val.append(imageid)
                     query = u'UPDATE files SET %s WHERE institution=? AND imageid=?' % ', '.join(para)
-                    logger.info(query)
-                    #cur.execute(query, val)
                     try:
                         cur.execute(query, val)
                     except sqlite3.IntegrityError as e:
@@ -204,7 +229,7 @@ for img in page.embeddedin(namespace=6):
             sql.commit()
 
         else:
-            logger.info('[[File:%s]] is identified as %s/%s', filename, institution, imageid)
+            logger.info('ADDED [[File:%s]]: identified as %s/%s', filename, institution, imageid)
 
             data['upload_date'] = time.mktime(firstrev['timestamp'])
             data['first_revision'] = firstrev['revid']
@@ -302,7 +327,7 @@ else:
         else:
             institution = rows[0]['institution']
             imageid = rows[0]['imageid']
-            logger.warning('[[%s]] is no longer identified as %s/%s', filename, institution, imageid)
+            logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', filename, institution, imageid)
             cur.execute(u'DELETE FROM files WHERE filename=?', [filename])
             sql.commit()
 
@@ -311,4 +336,6 @@ f = open('last_update', 'w')
 f.write('%.4f' % time.time())
 f.close()
 
-
+runend = datetime.datetime.now()
+runtime = (runend - runstart).total_seconds()
+logger.info('Updater completed. Runtime was %.f seconds.', runtime)
