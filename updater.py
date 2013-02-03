@@ -40,7 +40,7 @@ logger.info('This is updater.py')
 commons = mwclient.Site('commons.wikimedia.org')
 page = commons.pages['Template:Oslobilder']
 
-sql = sqlite3.connect('oslobilder.db')
+sql = sqlite3.connect('storage/oslobilder.db')
 sql.row_factory = sqlite3.Row
 cur = sql.cursor()
 

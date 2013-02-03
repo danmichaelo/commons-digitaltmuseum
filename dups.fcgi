@@ -24,7 +24,7 @@ def app(environ, start_response):
 
     start_response('200 OK', [('Content-Type', 'text/html')])
     
-    sql = sqlite3.connect('oslobilder.db')
+    sql = sqlite3.connect('storage/oslobilder.db')
     cur = sql.cursor()
     dups = []
     for row in cur.execute(u'SELECT institution,imageid,count(*) FROM files GROUP BY institution,imageid'):

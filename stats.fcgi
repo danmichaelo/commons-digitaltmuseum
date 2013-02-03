@@ -22,7 +22,7 @@ def app(environ, start_response):
 
     start_response('200 OK', [('Content-Type', 'text/html')])
     
-    sql = sqlite3.connect('oslobilder.db')
+    sql = sqlite3.connect('storage/oslobilder.db')
     cur = sql.cursor()
     html = 'Mest aktive opplastere:<ul>'
     for row in cur.execute(u'SELECT uploader, count(*) as cnt FROM files GROUP BY uploader ORDER BY cnt DESC'):

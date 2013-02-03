@@ -27,7 +27,7 @@ def app(environ, start_response):
     last_update = f.read()
     f.close()
 
-    sql = sqlite3.connect('oslobilder.db')
+    sql = sqlite3.connect('storage/oslobilder.db')
     cur = sql.cursor()
     rows = []
     row = cur.execute(u'SELECT count(filename) FROM files').fetchone()

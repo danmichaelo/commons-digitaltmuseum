@@ -218,7 +218,7 @@ div#info {
 }
 td.warn {
     text-align: center;
-    background: url(MW-Icon-AlertMark.svg.png) no-repeat left center #ffeeee;
+    background: url(images/MW-Icon-AlertMark.svg.png) no-repeat left center #ffeeee;
     padding-left: 20px;
     border-left: 2px solid #bb0000;
     border-radius: 10px;
@@ -243,8 +243,8 @@ div.ok, div.fail {
     vertical-align:middle;
 }
 div.ok {
-    background: url(MW-Icon-CheckMark.svg.png) no-repeat left top;
+    background: url(images/MW-Icon-CheckMark.svg.png) no-repeat left top;
 }
 div.fail {
-    background: url(MW-Icon-AlertMark.svg.png) no-repeat left top;
+    background: url(images/MW-Icon-AlertMark.svg.png) no-repeat left top;
 }
