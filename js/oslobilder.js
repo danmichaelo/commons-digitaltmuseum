@@ -30,6 +30,9 @@
             break;
         case 'date':
             sortkey = val.replace(/[^\d]/g, "");
+            for (var i = 8-sortkey.length; i > 0; i--) {
+                sortkey += '0';
+            }
             break;
         case 'upload_date':
             d = new Date(val*1000);
