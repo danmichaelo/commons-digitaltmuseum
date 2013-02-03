@@ -9,6 +9,7 @@ institutions = {
     'OMU': 'Oslo Museum',
     'BAR': 'Oslo byarkiv',
     'NF': 'Norsk folkemuseum',
+    'NFA': 'Norsk Farmasihistorisk Museum',
     'ARB': 'Arbeiderbevegelsens arkiv og bibliotek',
     'TELE': 'Telemuseet',
     'NTM': 'Norsk Teknisk Museum',

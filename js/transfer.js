@@ -27,6 +27,8 @@ function kortform(s) {
         return 'BAR';
     case 'norsk folkemuseum':
         return 'NF';
+    case 'norsk farmasihistorisk museum':
+        return 'NFA';
     case 'arbeiderbevegelsens arkiv og bibliotek':
         return 'ARB';
     case 'telemuseet':
