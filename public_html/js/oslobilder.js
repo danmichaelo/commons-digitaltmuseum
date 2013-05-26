@@ -79,7 +79,7 @@
 
     function getData(addToHistory) {
         var postdata = prepareData(addToHistory);
-        $.post("backend.fcgi", postdata, function (response) {
+        $.getJSON('backend', postdata, function (response) {
             var error = 0,
                 nimgs = 0,
                 i;

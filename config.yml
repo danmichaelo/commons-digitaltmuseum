@@ -19,9 +19,51 @@ columns:
     - id: thumb
       name: Miniatyr
       visible: Yes
+      sortable: No
     - id: filename
       name: Filnavn
-      visible: True
+      visible: No
+      sortable: Yes
+    - id: width
+      name: Bredde (px)
+      visible: Yes
+      sortable: Yes
+    - id: height
+      name: Høyde (px)
+      visible: Yes
+      sortable: Yes
+    - id: size
+      name: Størrelse (kB)
+      visible: Yes
+      sortable: Yes
+    - id: institution
+      name: Institusjon
+      visible: Yes
+      sortable: Yes
+    - id: imageid
+      name: Bilde-ID
+      visible: Yes
+      sortable: Yes
+    - id: collection
+      name: Samling
+      visible: Yes
+      sortable: Yes
+    - id: author
+      name: Opphavsmann
+      visible: Yes
+      sortable: Yes
+    - id: date
+      name: Dato
+      visible: Yes
+      sortable: Yes
+    - id: upload_date
+      name: Overført
+      visible: Yes
+      sortable: Yes
+    - id: description
+      name: Beskrivelse
+      visible: False
+      sortable: Yes
 
 fieldnames:
     - Bildetittel

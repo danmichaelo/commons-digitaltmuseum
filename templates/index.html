@@ -1,24 +1,26 @@
-## -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
-<%inherit file="base.html"/>\
-<%block name="header">
-    <script>
-    <% 
-    a= "', '".join([col[0] for col in columns]) 
-    b= ", ".join(["%s:'%s'"%(k,v) for k,v in institutions.items()]) 
-    %>
+{# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4 #}
+{% extends "layout.html" %}
+{% block title %}Oversikt{% endblock %}
+{% block header %}
+<script>
     $.oslobilder = {
-        columns : ['${a}'],
-        institutions : {${b}},
-        default_limit : ${default_limit},
-        default_sort : "${default_sort}",
-        default_sortorder : "${default_sortorder}"
+        columns : ['{{ columns|map(attribute='id')|join("','")|safe }}'],
+        institutions: {
+        {% for key, val in institutions.items() %}
+            '{{key}}': '{{val}}',
+        {% endfor %}
+        },
+        default_limit : {{default_limit}},
+        default_sort : '{{default_sort}}',
+        default_sortorder : '{{default_sortorder}}'
     };
     </script>
     <script src="js/oslobilder.js"></script>
-</%block>\
+{% endblock %}
+{% block body %}
 
 <div id="intro">
-    <strong>Totalt er det registrert ${total} bilder på Commons, basert på ${unique} bilder fra oslobilder.no. Sist oppdatert <span id="last_update">-</span>.</strong>
+    <strong>Totalt er det registrert {{total}} bilder på Commons, basert på {{unique}} bilder fra oslobilder.no. Sist oppdatert <span id="last_update">-</span>.</strong>
 </div>
 
 <form method="post" class="well form-inline">
@@ -29,12 +31,12 @@
             </td>
             <td colspan=4>
                 [Alle: <a href="#" id="alle_pa">på</a> / <a href="#" id="alle_av">av</a> ]
-                %for a in totals:
+        {% for a in totals %}
                 <label class="checkbox">
-                    <input type="checkbox" name="inst_${a}" id="inst_${a}" checked="checked" />
-                    ${institutions[a]} (${totals[a]})
+            <input type="checkbox" name="inst_{{a}}" id="inst_{{a}}" checked="checked" />
+            {{institutions[a]}} ({{totals[a]}})
                 </label>
-                %endfor
+        {% endfor %}
             </td>
         </tr>
         <tr>
@@ -72,10 +74,10 @@
              </td>
              <td>
                 <select name="limit" id="limit">
-                    %for a in [100,200,500,1000]:
-                    <% selected = ' selected="selected"' if default_limit == a else '' %>
-                    <option value="${a}"${selected}>${a}</option>
-                    %endfor
+            {% for a in [100,200,500,1000] %}
+            {% set selected = ' selected="selected"' if default_limit == a else '' %}
+            <option value="{{a}}"{{selected}}>{{a}}</option>
+            {% endfor %}
                 </select>
             </td>
             <td style="width:150px;">
@@ -83,16 +85,18 @@
             </td>
             <td>
                 <select name="sort" id="sort">
-                    %for a in columns:
-                    <% selected = ' selected="selected"' if default_sort == a[0] else '' %>
-                    <option value="${a[0]}"${selected}>${a[1]}</option>
-                    %endfor
+            {% for a in columns %}
+            {% if a['sortable'] %}
+            {% set selected = ' selected="selected"' if default_sort == a['id'] else '' %}
+            <option value="{{a['id']}}"{{selected}}>{{a['name']}}</option>
+            {% endif %}
+            {% endfor %}
                 </select>
                 <select name="sortorder" id="sortorder">
-                    <% selected = ' selected="selected"' if default_sortorder == 'asc' else '' %>
-                    <option value="asc"${selected}>Stigende</option>
-                    <% selected = ' selected="selected"' if default_sortorder == 'desc' else '' %>
-                    <option value="desc"${selected}>Synkende</option>
+            {% set selected = ' selected="selected"' if default_sortorder == 'asc' else '' %}
+            <option value="asc"{{selected}}>Stigende</option>
+            {% set selected = ' selected="selected"' if default_sortorder == 'desc' else '' %}
+            <option value="desc"{{selected}}>Synkende</option>
                 </select>
             </td>
         </tr>
@@ -110,20 +114,20 @@
     <div id="results-intro"></div>
     <div id="col-filter">
     Vis kolonner:
-    %for col in columns:
-    <% chk = 'checked="checked"' if col[2] else '' %>
+    {%for col in columns %}
+    {% set chk = 'checked="checked"' if col['visible'] else '' %}
         <label type="checkbox" style="display:inline-block;">
-            <input type="checkbox" id="chk_${col[0]}" ${chk} />
-            ${col[1]}
+        <input type="checkbox" id="chk_{{col['id']}}" {{chk}} />
+        {{col['name']}}
         </label>
-    %endfor
+    {% endfor %}
     </div>
 
     <table id="oslobilder" class="wikitable">
         <thead><tr>
-        %for col in columns:
-            <th class="headerSort">${col[1]}</th>
-        %endfor
+            {% for col in columns %}
+            <th class="headerSort">{{col['name']}}</th>
+            {% endfor %}
         </tr></thead>
         <tbody>
         </tbody>
@@ -134,11 +138,12 @@
 
 <script>
 $(document).ready(function() {
-    var d = new Date(${last_update}*1000);
-%for col in columns:
-<% hid = ("    $('tr>th:nth-child(%d),td:nth-child(%d)').hide();\n" % (loop.index+1,loop.index+1)) if not col[2] else '' %>\
-${hid}\
-%endfor
+    var d = new Date({{last_update}}*1000);
+    {%for col in columns %}
+    {%if not col['visible'] %}
+    {{ "$('tr>th:nth-child(%d), td:nth-child(%d)').hide();" |format(loop.index + 1, loop.index + 1) |safe }}
+    {%endif%}
+    {%endfor%}
     $('#oslobilder').tablesorter();
     $('#last_update').html(d.toString("d. MMM yyyy, kl. HH.mm"));
 });
@@ -146,3 +151,5 @@ ${hid}\
 </script>
 
 <div id="query"></div>
+
+{% endblock %}
