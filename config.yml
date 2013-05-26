@@ -1,0 +1,46 @@
+# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
+
+default_limit: 200
+default_sort: upload_date
+default_sortorder: desc
+
+institutions:
+    OMU: Oslo Museum
+    BAR: Oslo byarkiv
+    NF: Norsk folkemuseum
+    NFA: Norsk Farmasihistorisk Museum
+    ARB: Arbeiderbevegelsens arkiv og bibliotek
+    TELE: Telemuseet
+    NTM: Norsk Teknisk Museum
+    KFS: DEXTRA Photo / NTM
+    UBB: Universitetsbiblioteket i Bergen
+
+columns:
+    - id: thumb
+      name: Miniatyr
+      visible: Yes
+    - id: filename
+      name: Filnavn
+      visible: True
+
+fieldnames:
+    - Bildetittel
+    - Motiv
+    - Datering
+    - Fotograf
+    - Avbildet person
+    - Avbildet sted
+    - Utsikt over
+    - Utgiver
+    - Permalenke
+    - Emneord
+    - Bildenummer
+    - Historikk
+    - Permalenke
+    - Eierinstitusjon
+    - Arkiv/Samling
+    - Kunstner
+    - Tittel
+    - Eier
+    - Inngår i samling
+    - Identifikasjonsnr.
