@@ -15,7 +15,10 @@ cgitb.enable()
 import sqlite3
 from mako.template import Template
 from mako.lookup import TemplateLookup
-from config import default_limit, default_sort, default_sortorder, institutions, columns
+import yaml
+
+config = yaml.load(open('../config.yml', 'r'))
+#from config import default_limit, default_sort, default_sortorder, institutions, columns
 
 def app(environ, start_response):
 
@@ -36,20 +39,20 @@ def app(environ, start_response):
     for row in cur.execute(u'SELECT institution, count(institution) FROM files GROUP BY institution'):
         totals[row[0]] = row[1]
 
-    mylookup = TemplateLookup(directories=['.'], input_encoding='utf-8', output_encoding='utf-8')
-    tpl = Template(filename='template.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
+    mylookup = TemplateLookup(directories=['../templates/'], input_encoding='utf-8', output_encoding='utf-8')
+    tpl = Template(filename='../templates/index.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
     yield tpl.render_unicode(
             active_page='./', 
             rows=[], 
             total=total, 
             unique=unique, 
             totals=totals, 
-            institutions=institutions, 
-            columns=columns, 
+            institutions=config['institutions'], 
+            columns=config['columns'], 
             last_update=last_update,
-            default_limit=default_limit,
-            default_sort=default_sort,
-            default_sortorder=default_sortorder
+            default_limit=config['default_limit'],
+            default_sort=config['default_sort'],
+            default_sortorder=config['default_sortorder']
             ).encode('utf-8')
 
 WSGIServer(app).run()

@@ -28,9 +28,9 @@ def app(environ, start_response):
         #html += '<li><a href="http://commons.wikimedia.org/wiki/File:%s">%s<br />%s</a></li>\n' % (enc, thumb, row[0])
     html += '</ul>\n'
 
-    mylookup = TemplateLookup(directories=['.'], input_encoding='utf-8', output_encoding='utf-8')
-    tpl = Template(filename='dups.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
-    yield tpl.render_unicode(active_page="stats.fcgi", main=html).encode('utf-8')
+    mylookup = TemplateLookup(directories=['../templates/'], input_encoding='utf-8', output_encoding='utf-8')
+    tpl = Template(filename='../templates/dups.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
+    yield tpl.render_unicode(active_page="stats.py", main=html).encode('utf-8')
 
 WSGIServer(app).run()
 

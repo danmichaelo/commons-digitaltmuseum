@@ -27,7 +27,10 @@ warn_handler.setFormatter(formatter)
 import cgitb
 cgitb.enable()
 
-from config import fieldnames
+import yaml
+
+config = yaml.load(open('../config.yml', 'r'))
+
 
 def check_url(url, hostname):
     logger = logging.getLogger()
@@ -97,7 +100,7 @@ def check_url(url, hostname):
 
     r3 = re.compile(r'^([^,]), (.*)$')
     r4 = re.compile(r'ukjent( person)?', re.I)
-    fieldnames_re = [re.compile(q) for q in fieldnames]
+    fieldnames_re = [re.compile(q) for q in config['fieldnames']]
 
     for tag in soup.find_all('dt'):
         name = tag.text
@@ -109,7 +112,7 @@ def check_url(url, hostname):
         if not matched:
             logger.warn('Found unknown field: "%s" (URL: %s)', name, url)
 
-    for fn, fn_re in zip(fieldnames, fieldnames_re):
+    for fn, fn_re in zip(config['fieldnames'], fieldnames_re):
         tag = soup.find('dt', text=fn_re)
         if not tag:
             fields[fn] = 'NOTFOUND'

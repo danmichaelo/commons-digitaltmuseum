@@ -4,8 +4,6 @@
 import re, sys, os
 from time import time
 
-import cgi
-from cgi import escape
 from flup.server.fcgi import WSGIServer
 import urllib
 import urlparse
@@ -16,12 +14,11 @@ import cgitb
 cgitb.enable()
 
 import sqlite3
-from mako.template import Template
-from mako.lookup import TemplateLookup
-import mwclient
-from danmicholoparser import TemplateEditor
-from config import default_limit, default_sort, default_sortorder, institutions, columns
 from common import get_thumb_url
+import yaml
+
+config = yaml.load(open('../config.yml', 'r'))
+
 
 def app(environ, start_response):
 
@@ -33,9 +30,9 @@ def app(environ, start_response):
     last_update = f.read()
     f.close()
 
-    plimit = default_limit
-    psort = default_sort
-    porder = default_sortorder
+    plimit = config['default_limit']
+    psort = config['default_sort']
+    porder = config['default_sortorder']
     where = []
     whereData = []
     post_input = {}
@@ -56,7 +53,7 @@ def app(environ, start_response):
                 try:
                     plimit = int(val)
                 except ValueError:
-                    plimit = default_limit
+                    plimit = config['default_limit']
             elif key == 'sort':
                 psort = re.sub('[^\w]', '', val) # leaves A-Za-z0-9_
             elif key == 'order':
@@ -79,7 +76,7 @@ def app(environ, start_response):
                             where.append('%s=?' % knownkey)
                             whereData.append(val.decode('utf-8'))
                 
-        if len(req_inst) > 0 and len(req_inst) < len(institutions):
+        if len(req_inst) > 0 and len(req_inst) < len(config['institutions']):
             where.append('institution IN (%s)' % ','.join( ["?" for q in range(len(req_inst))] ))
             whereData.extend(req_inst)
 

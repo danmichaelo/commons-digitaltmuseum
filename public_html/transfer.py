@@ -15,16 +15,15 @@ cgitb.enable()
 import sqlite3
 from mako.template import Template
 from mako.lookup import TemplateLookup
-from config import fieldnames
 
 def app(environ, start_response):
 
     start_response('200 OK', [('Content-Type', 'text/html')])
     
-    mylookup = TemplateLookup(directories=['.'], input_encoding='utf-8', output_encoding='utf-8')
-    tpl = Template(filename='transfer.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
+    mylookup = TemplateLookup(directories=['../templates/'], input_encoding='utf-8', output_encoding='utf-8')
+    tpl = Template(filename='../templates/transfer.html', input_encoding='utf-8', output_encoding='utf-8', lookup=mylookup)
     #yield tpl.render(active_page="dups.fcgi", main=html.decode('utf-8'))
-    yield tpl.render_unicode(active_page="transfer.fcgi").encode('utf-8')
+    yield tpl.render_unicode(active_page="transfer.py").encode('utf-8')
 
 WSGIServer(app).run()
 
