@@ -15,8 +15,6 @@ cgitb.enable()
 import sqlite3
 from mako.template import Template
 from mako.lookup import TemplateLookup
-import mwclient
-from danmicholoparser import TemplateEditor
 from config import institutions
 from common import get_thumb_url
 

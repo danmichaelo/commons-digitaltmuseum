@@ -91,7 +91,7 @@ def app(environ, start_response):
     #yield where
     #return
 
-    sql = sqlite3.connect('oslobilder.db')
+    sql = sqlite3.connect('storage/oslobilder.db')
     #sql.row_factory = sqlite3.Row
     cur = sql.cursor()
     rows = []

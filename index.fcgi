@@ -15,8 +15,6 @@ cgitb.enable()
 import sqlite3
 from mako.template import Template
 from mako.lookup import TemplateLookup
-import mwclient
-from danmicholoparser import TemplateEditor
 from config import default_limit, default_sort, default_sortorder, institutions, columns
 
 def app(environ, start_response):

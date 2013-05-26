@@ -188,7 +188,7 @@ def check_url(url, hostname):
 
     # Check if image has already been transferred
 
-    sql = sqlite3.connect('oslobilder.db')
+    sql = sqlite3.connect('storage/oslobilder.db')
     sql.row_factory = sqlite3.Row
     cur = sql.cursor()
     rows = cur.execute(u'SELECT filename FROM files ' + \

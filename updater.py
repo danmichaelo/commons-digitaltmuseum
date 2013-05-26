@@ -5,7 +5,7 @@ import os
 import mwclient
 import sqlite3
 import time, datetime
-from danmicholoparser import TemplateEditor
+from mwtemplates import TemplateEditor
 import logging
 import logging.handlers
 import time
@@ -76,13 +76,21 @@ for crow in ccur:
     te = TemplateEditor(txt)
 
     tpl = te.templates['oslobilder'][0]
-    institution = tpl.parameters[1]
-    imageid = tpl.parameters[2]
+    if 1 in tpl.parameters:
+        institution = tpl.parameters[1].value
+    else:
+        logger.warning('[[File:%s]] %s', filename, 'Too few parameters given!')
+        continue
+    if 2 in tpl.parameters:
+        imageid = tpl.parameters[2].value
+    else:
+        logger.warning('[[File:%s]] %s', filename, 'Too few parameters given!')
+        continue
     collection = ''
     if 'collection' in tpl.parameters:
-        collection = tpl.parameters['collection']
+        collection = tpl.parameters['collection'].value
     elif 3 in tpl.parameters:
-        collection = tpl.parameters[3]
+        collection = tpl.parameters[3].value
 
     if 'information' in te.templates:
         tpl = te.templates['information'][0]
@@ -95,44 +103,44 @@ for crow in ccur:
         continue
     
     if 'description' in tpl.parameters:
-        desc = tpl.parameters['description']
+        desc = tpl.parameters['description'].value
     elif 'Description' in tpl.parameters:
-        desc = tpl.parameters['Description']
+        desc = tpl.parameters['Description'].value
     else:
         desc = ''
         #logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |description=')
         continue
 
     if 'date' in tpl.parameters:
-        date = tpl.parameters['date']
+        date = tpl.parameters['date'].value
     elif 'Date' in tpl.parameters:
-        date = tpl.parameters['Date']
+        date = tpl.parameters['Date'].value
     else:
         date = ''
         logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |date=')
         continue
     
     if 'source' in tpl.parameters:
-        source = tpl.parameters['source']
+        source = tpl.parameters['source'].value
     elif 'Source' in tpl.parameters:
-        source = tpl.parameters['Source']
+        source = tpl.parameters['Source'].value
     else:
         source = ''
         logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |source=')
         continue
 
     if 'author' in tpl.parameters:
-        author = tpl.parameters['author']
+        author = tpl.parameters['author'].value
     elif 'Author' in tpl.parameters:
-        author = tpl.parameters['Author']
+        author = tpl.parameters['Author'].value
     elif 'photographer' in tpl.parameters:
-        author = tpl.parameters['photographer']
+        author = tpl.parameters['photographer'].value
     elif 'Photographer' in tpl.parameters:
-        author = tpl.parameters['Photographer']
+        author = tpl.parameters['Photographer'].value
     elif 'artist' in tpl.parameters:
-        author = tpl.parameters['artist']
+        author = tpl.parameters['artist'].value
     elif 'Artist' in tpl.parameters:
-        author = tpl.parameters['Artist']
+        author = tpl.parameters['Artist'].value
     else:
         author = ''
         logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |author= or |artist= or |photographer=')
