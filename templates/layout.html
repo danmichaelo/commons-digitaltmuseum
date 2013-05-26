@@ -1,0 +1,38 @@
+{# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4 #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %} | DigiMus-Commons</title>
+    <script src="js/date-nb-NO.js"></script>
+    <!--<script src="js/jquery.combined.js"></script>-->
+    <script src="js/jquery-1.8.2.min.js"></script>
+    <script src="js/jquery.mwExtension.js"></script>
+    <script src="js/jquery.tablesorter.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css" />
+    {% block header %}{% endblock %}
+</head>
+<body>
+    <div id="navbar">
+        <h1>Oslobilder @ Commons</h1>
+	<ul>
+		<a href="/digimus/">Oversikt</a>
+		<a href="/digimus/dups">Mulige duplikater</a>
+		<a href="/digimus/stats">Statistikk</a>
+		<a href="/digimus/transfer">Overfør bilder</a>
+        </ul>
+    </div>
+    
+    {% block body %}{% endblock %}
+
+<div id="footer">
+    A tool by <a href="//no.wikipedia.org/wiki/Bruker:Danmichaelo">Danmichaelo</a>. 
+    <a href="https://github.com/danmichaelo/digimus-commons">Open source</a> 
+    (<a href="http://opensource.org/licenses/MIT">MIT license</a>).
+</div>
+
+</body>
+</html>
+
