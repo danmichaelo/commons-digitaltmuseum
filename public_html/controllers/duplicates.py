@@ -36,7 +36,7 @@ class Duplicates(Controller):
 
                 thumb_url = self.get_thumb_url(name, thumbw)
                 thumb = '<img src="%s" border="0" alt="%s" width="%d" height="%d"/>' % (thumb_url, name, thumbw, thumbh)
-                html += '<li><a href="http://commons.wikimedia.org/wiki/File:%s">%s<br />%s</a></li>\n' % (name_enc, thumb, row[0])
+                html += '<li><a href="https://commons.wikimedia.org/wiki/File:%s">%s<br />%s</a></li>\n' % (name_enc, thumb, row[0])
             html += '</ul>\n'
         html += '</ul>\n'
 

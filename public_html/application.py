@@ -3,8 +3,7 @@
 
 import sys
 sys.stderr = sys.stdout
-sys.path.insert(0, '/data/project/digimus/ENV/lib/python2.7/site-packages')
-
+sys.path.insert(0, '/data/project/digitaltmuseum/ENV/lib/python2.7/site-packages')
 
 import cgitb
 cgitb.enable()
@@ -49,7 +48,7 @@ url_map = Map([
 
 def application(environ, start_response):
     #logger.info(environ)
-    environ['SCRIPT_NAME'] = '/digimus'
+    environ['SCRIPT_NAME'] = '/digitaltmuseum'
 
     try:
 

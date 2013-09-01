@@ -3,11 +3,10 @@ RewriteEngine On
 #RewriteCond %{HTTPS} off
 #RewriteRule (.*) https://tools.wmflabs.org/digimus/$1 [R=301,L]
 
-
 # Don't interfere with static files
 RewriteCond %{REQUEST_FILENAME} -d [OR]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule . - [L]
 
-RewriteRule ^(.*)$ /digimus/application.py/$1 [L]
+RewriteRule ^(.*)$ /digitaltmuseum/application.py/$1 [L]
 

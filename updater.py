@@ -46,7 +46,7 @@ cur = sql.cursor()
 
 db = oursql.connect(db='commonswiki_p',
     host='commonswiki.labsdb',
-    read_default_file=os.path.expanduser('~/replica.my.cnf'),
+    read_default_file=os.path.expanduser('~/temporary_replica.my.cnf'),
     charset=None,
     use_unicode=False
 )
