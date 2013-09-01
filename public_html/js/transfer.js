@@ -146,16 +146,12 @@ $(document).ready(function () {
 
     $('#theform').on('submit', function () {
 
-        $.get('./transfer_bg.fcgi', { 'url': $('#inputurl').val() }, function (data, textStatus, jqXHR) {
+        $.getJSON('./transferbg', { 'url': $('#inputurl').val() }, function (data) {
             var commons_url,
                 imgLink,
                 emsg = '',
                 avbildet = [];
-            try {
-                data = $.parseJSON(data);
-            } catch (e) {
-                data = { error: data };
-            }
+
             $('#theform .alert').remove();
 
             if (data.hasOwnProperty('error')) {
@@ -257,7 +253,7 @@ $(document).ready(function () {
                 $('#Avbildet').html(avbildet.join(' '));
                 $('#Emneord').html(emneord.join(' '));
                 $('#imgLink').html(imgLink);
-                
+
                 $('div#info').show();
 
                 //if (current_year - year > 100) {
@@ -280,7 +276,7 @@ $(document).ready(function () {
                         }
                         lisens += '<option value="{{PD-1923}}"'+sel+'>{{PD-1923}} Bildet er publisert før 1923.</option>';
                         //license = '{{PD-Norway50}}\n{{PD-1923}}';
-                        
+
                         lisens += '</select></li></ul><button id="license-btn">Ok</button>';
                         $('#Lisens').html('<div class="ok">' + lisens + '</div>');
                         $('#license-btn').click(function() {
@@ -303,7 +299,7 @@ $(document).ready(function () {
 
             }
 
-        }).error(function() { 
+        }).error(function() {
             $('#theform .alert').remove();
             $('#theform').append('<div class="alert alert-error">Nettverksproblem</div>');
         });
@@ -312,7 +308,7 @@ $(document).ready(function () {
     });
 
     $('form#upload :submit').on('click', function(e) {
-        $('form#upload').attr('action', 'http://commons.wikimedia.org/w/index.php?title=Special:Upload&uploadformstyle=basic&wpDestFile=' + encodeURIComponent($("#wpDestFile").val()));
+        $('form#upload').attr('action', 'https://commons.wikimedia.org/w/index.php?title=Special:Upload&uploadformstyle=basic&wpDestFile=' + encodeURIComponent($("#wpDestFile").val()));
     });
 
 });

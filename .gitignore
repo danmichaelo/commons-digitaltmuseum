@@ -15,3 +15,4 @@ wp_private.py
 # Mac stuff 
 *.DS_Store
 
+ENV

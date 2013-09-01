@@ -1,4 +1,7 @@
 jinja2
 werkzeug
 pyyaml
-
+mwclient
+mwtemplates
+oursql
+beautifulsoup4

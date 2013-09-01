@@ -45,8 +45,8 @@ sql.row_factory = sqlite3.Row
 cur = sql.cursor()
 
 db = oursql.connect(db='commonswiki_p',
-    host='commonswiki-p.rrdb.toolserver.org',
-    read_default_file=os.path.expanduser('~/.my.cnf'),
+    host='commonswiki.labsdb',
+    read_default_file=os.path.expanduser('~/replica.my.cnf'),
     charset=None,
     use_unicode=False
 )
