@@ -19,7 +19,9 @@ import sqlite3
 import StringIO, gzip
 import yaml
 
-from controller import Controller
+from flask import request, url_for, make_response
+
+from .controller import Controller
 
 import logging
 logger = logging.getLogger()
@@ -180,17 +182,20 @@ class Transferbg(Controller):
 
         # Find institution and image identification
 
+        # DEBUG:
+        # return { 'error': 'schwoing', 'metadata': fields }
+
         if fields['Permalenke'] != 'NOTFOUND':
             institution, imageid = fields['Permalenke'].split('/',4)[3:]
-        elif fields['Eier'] != 'NOTFOUND' and fields['Identifikasjonsnr.'] != 'NOTFOUND':
+        elif fields['Eier'] != 'NOTFOUND' and fields['Inventarnr.'] != 'NOTFOUND':
             institution = fields['Eier']
-            imageid = fields['Identifikasjonsnr.']
+            imageid = fields['Inventarnr.']
         else:
             return { 'error': 'unknown_institution', 'metadata': fields }
 
         # Check if image has already been transferred
 
-        sql = sqlite3.connect('../storage/oslobilder.db')
+        sql = sqlite3.connect('/data/project/digitaltmuseum/storage/oslobilder.db')
         sql.row_factory = sqlite3.Row
         cur = sql.cursor()
         rows = cur.execute(u'SELECT filename FROM files ' + \
@@ -209,9 +214,9 @@ class Transferbg(Controller):
              #yield '<tr><th>%s</th><td>%s</td></tr>' % (escape(k), escape(v))
         #yield '</table>'
 
-    def get(self, request, args):
+    def get(self):
 
-        url = request.args['url']
+        url = request.args.get('url')
 
         import sys
         sys.stderr = sys.stdout
@@ -231,5 +236,7 @@ class Transferbg(Controller):
             sys.exit(0)
 
         data = json.dumps(self.check_url(url, hostname))
-        return Response(data, mimetype='application/json')
+        resp = make_response(data)
+        resp.headers['Content-Type'] = 'application/json'
+        return resp
 

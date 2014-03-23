@@ -3,9 +3,10 @@
 import json
 from werkzeug.wrappers import Response
 from time import time
-from controller import Controller
 import sqlite3
 import urllib
+from flask import render_template
+from .controller import Controller
 
 import logging
 logger = logging.getLogger()

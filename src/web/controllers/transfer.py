@@ -2,7 +2,9 @@
 
 import sqlite3
 
-from controller import Controller
+from flask import render_template
+from .controller import Controller
+
 
 class Transfer(Controller):
 
@@ -10,6 +12,6 @@ class Transfer(Controller):
         Controller.__init__(self)
         self.config = config
 
-    def get(self, request, args):
+    def get(self):
 
-        return self.render_template('transfer.html')
+        return render_template('transfer.html')

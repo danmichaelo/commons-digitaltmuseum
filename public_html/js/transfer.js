@@ -105,7 +105,7 @@ $(document).ready(function () {
                 '|title = ' + tittel,
                 '|medium = ',
                 '|dimensions = ',
-                '|institutions = ',
+                '|institution = ',
                 '|location = ',
                 '|permission = ',
                 '|other_versions = ',

@@ -2,7 +2,8 @@
 
 import sqlite3
 import urllib
-from controller import Controller
+from flask import render_template
+from .controller import Controller
 
 class Duplicates(Controller):
 
@@ -10,9 +11,9 @@ class Duplicates(Controller):
         Controller.__init__(self)
         self.config = config
 
-    def get(self, request, args):
+    def get(self):
 
-        sql = sqlite3.connect('../storage/oslobilder.db')
+        sql = sqlite3.connect('/data/project/digitaltmuseum/storage/oslobilder.db')
         cur = sql.cursor()
         dups = []
         for row in cur.execute(u'SELECT institution,imageid,count(*) FROM files GROUP BY institution,imageid'):
@@ -40,5 +41,5 @@ class Duplicates(Controller):
             html += '</ul>\n'
         html += '</ul>\n'
 
-        return self.render_template('dups.html', main=html)
+        return render_template('dups.html', main=html)
 
