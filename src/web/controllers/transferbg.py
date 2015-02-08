@@ -41,7 +41,7 @@ class Transferbg(Controller):
             us = url.split('/')
             if not us[3] == 'things':
                 logger.warn('Unknown URL: %s' % url)
-                return 'unknown url'
+                return {'error': 'Bildet har en ukjent URL'}
             thing = us[4]
 
         #yield url
