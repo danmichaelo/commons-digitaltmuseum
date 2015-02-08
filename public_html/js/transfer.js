@@ -156,7 +156,7 @@ $(document).ready(function () {
 
             if (data.hasOwnProperty('error')) {
                 if (data.error === 'duplicate') {
-                    commons_url = 'http://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
+                    commons_url = 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(data.filename);
                     emsg = "Bildet er <a href=\"" + commons_url + "\">allerede overført til commons</a>";
                 } else {
                     emsg = data.error;

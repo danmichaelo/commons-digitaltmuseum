@@ -1,5 +1,5 @@
 <?php
-$url = 'http://commons.wikimedia.org/w/index.php';
+$url = 'https://commons.wikimedia.org/w/index.php';
 $method   = (!empty($_POST)) ? 'post' : 'get';
 
 $ch = curl_init();
