@@ -59,13 +59,13 @@ class Transferbg(Controller):
             cp = soup.find_all('p', 'copyright')
         if len(cp) == 0:
             logger.warn('No license info (URL: %s)', url)
-            return { 'error': 'Bildet inneholder ingen lisensinformasjon' }
+            return {'error': 'Fant ikke lisensinformasjon for bildet'}
         else:
             try:
                 tag = cp[0].find('a').get('href')
             except AttributeError:
                 logger.warn('No license info (URL: %s)', url)
-                return { 'error': 'Bildet inneholder ingen lisensinformasjon' }
+                return {'error': 'Fant ikke lisensinformasjon for bildet'}
         license = 'unknown'
         if tag.find('licenses/by-sa/') != -1:
             license = 'by-sa'
@@ -74,7 +74,7 @@ class Transferbg(Controller):
         elif tag.find('/publicdomain/') != -1:
             license = 'pd'
         else:
-            logger.warn('Found unknown license: "%s" (URL: %s)', tag, url)
+            logger.warn('Fant en ukjent lisens: "%s" (URL: %s)', tag, url)
 
         # Find other metadata:
 
