@@ -36,14 +36,6 @@ class Transferbg(Controller):
     def check_url(self, url, hostname):
         logger = logging.getLogger()
 
-        thing = ''
-        if hostname == 'digitaltmuseum':
-            us = url.split('/')
-            if not us[3] == 'things':
-                logger.warn('Unknown URL: %s' % url)
-                return {'error': 'Bildet har en ukjent URL'}
-            thing = us[4]
-
         #yield url
         req = urllib2.Request(url, headers={
             'User-Agent': 'Oslobilder@Commons (+http://toolserver.org/~danmichaelo/oslobilder)',
@@ -203,7 +195,7 @@ class Transferbg(Controller):
         if len(rows) > 0:
             return { 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] }
         else:
-            return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year, 'hostname': hostname, 'thing': thing }
+            return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year, 'hostname': hostname }
 
         cur.close()
         sql.close()

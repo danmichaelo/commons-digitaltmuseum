@@ -48,7 +48,7 @@ function kortform(s) {
 $(document).ready(function () {
     "use strict";
 
-    var license, fotograf, kunstner, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src, hostname, thing;
+    var license, fotograf, kunstner, dato, year, institusjon, inst, bildenr, samling, historikk, motiv, tittel, src, hostname;
 
     $('div#info').hide();
     $('form#upload').hide();
@@ -93,7 +93,7 @@ $(document).ready(function () {
         if (hostname == 'oslobilder') {
             srcTemplate = '{{Oslobilder|' + inst + '|' + bildenr + '|' + samling + '}}';
         } else {
-            srcTemplate = '{{DigitaltMuseum|' + inst + '|' + bildenr + '|' + samling + '|thing=' + thing + '}}';
+            srcTemplate = '{{DigitaltMuseum|' + inst + '|' + bildenr + '|' + samling + '}}';
         }
 
         if (kunstner !== 'NOTFOUND') {
@@ -168,7 +168,6 @@ $(document).ready(function () {
                 src = data.src;
                 license = data.license;
                 hostname = data.hostname;
-                thing = data.thing;
                 fotograf = data.metadata.Fotograf;
                 kunstner = data.metadata.Kunstner;
                 dato = data.metadata.Datering;
