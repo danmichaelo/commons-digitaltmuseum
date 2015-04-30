@@ -5,3 +5,6 @@ oursql
 beautifulsoup4
 flup
 flask
+datetime
+six
+requests[security]
