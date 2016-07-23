@@ -6,12 +6,11 @@ from flask import render_template
 from .controller import Controller
 
 
-class Transfer(Controller):
+class TransferController(Controller):
 
-    def __init__(self, config):
-        Controller.__init__(self)
+    def __init__(self, app, config):
+        Controller.__init__(self, app)
         self.config = config
 
     def get(self):
-
         return render_template('transfer.html')

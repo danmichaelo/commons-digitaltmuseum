@@ -146,7 +146,7 @@ $(document).ready(function () {
 
     $('#theform').on('submit', function () {
 
-        $.getJSON('./transferbg', { 'url': $('#inputurl').val() }, function (data) {
+        $.getJSON('./url', { 'url': $('#inputurl').val() }, function (data) {
             var commons_url,
                 imgLink,
                 emsg = '',

@@ -10,6 +10,7 @@ import os
 from werkzeug.wrappers import Response
 
 import urllib2
+import requests
 from bs4 import BeautifulSoup
 import json
 import cgi
@@ -27,29 +28,23 @@ import logging
 logger = logging.getLogger()
 
 
-class Transferbg(Controller):
+class UrlController(Controller):
 
-    def __init__(self, config):
-        Controller.__init__(self)
+    def __init__(self, app, config):
+        Controller.__init__(self, app)
         self.config = config
 
     def check_url(self, url, hostname):
         logger = logging.getLogger()
 
-        #yield url
-        req = urllib2.Request(url, headers={
-            'User-Agent': 'Oslobilder@Commons (+http://toolserver.org/~danmichaelo/oslobilder)',
-            'Referer': 'http://toolserver.org/~danmichaelo/oslobilder',
+        # yield url
+        response = requests.get(url, headers={
+            'User-Agent': 'Oslobilder@Commons (+https://toolserver.org/~danmichaelo/oslobilder)',
+            'Referer': 'https://toolserver.org/~danmichaelo/oslobilder',
             'Accept-Encoding': 'gzip'
         })
-        f = urllib2.urlopen(req)
-        headers = f.info()
-        if headers.get('Content-Encoding') in ('gzip', 'x-gzip'):
-            data = gzip.GzipFile(fileobj=StringIO.StringIO(f.read())).read()
-        else:
-            data = f.read()
 
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(response.text)
         commons = mwclient.Site('commons.wikimedia.org')
 
         # Find license info:
@@ -172,6 +167,8 @@ class Transferbg(Controller):
         else:
             src = soup.find('div','image').findChild('img').get('src')
 
+        src = src.split('?')[0]  # remove dimensions query string
+
         # Find institution and image identification
 
         # DEBUG:
@@ -187,9 +184,9 @@ class Transferbg(Controller):
 
         # Check if image has already been transferred
 
-        sql = sqlite3.connect('/data/project/digitaltmuseum/storage/oslobilder.db')
-        sql.row_factory = sqlite3.Row
-        cur = sql.cursor()
+        db = self.open_db()
+        db.row_factory = sqlite3.Row
+        cur = db.cursor()
         rows = cur.execute(u'SELECT filename FROM files ' + \
                 'WHERE institution=? AND imageid=?', (institution, imageid)).fetchall()
         if len(rows) > 0:
@@ -198,7 +195,7 @@ class Transferbg(Controller):
             return { 'license': license, 'src': src, 'metadata': fields, 'cats': cats, 'year': year, 'hostname': hostname }
 
         cur.close()
-        sql.close()
+        db.close()
         #yield "hello"
 
         #yield '<table>'

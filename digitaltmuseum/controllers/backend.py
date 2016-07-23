@@ -12,10 +12,10 @@ import logging
 logger = logging.getLogger()
 
 
-class Backend(Controller):
+class BackendController(Controller):
 
-    def __init__(self, config):
-        Controller.__init__(self)
+    def __init__(self, app, config):
+        Controller.__init__(self, app)
         self.config = config
 
     def __init__(self, config):

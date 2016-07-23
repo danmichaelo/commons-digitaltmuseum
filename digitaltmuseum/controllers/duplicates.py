@@ -5,16 +5,17 @@ import urllib
 from flask import render_template
 from .controller import Controller
 
-class Duplicates(Controller):
 
-    def __init__(self, config):
-        Controller.__init__(self)
+class DuplicatesController(Controller):
+
+    def __init__(self, app, config):
+        Controller.__init__(self, app)
         self.config = config
 
     def get(self):
 
-        sql = sqlite3.connect('/data/project/digitaltmuseum/storage/oslobilder.db')
-        cur = sql.cursor()
+        db = self.open_db()
+        cur = db.cursor()
         dups = []
         for row in cur.execute(u'SELECT institution,imageid,count(*) FROM files GROUP BY institution,imageid'):
             if row[2] > 1:
@@ -23,7 +24,7 @@ class Duplicates(Controller):
         html = u'<ul>'
         for dup in dups:
             html += '<li>%s/%s er oppgitt som kilde for:\n<ul class="dups">\n' % tuple(dup)
-            #yield(type(html).__name__)
+            # yield(type(html).__name__)
             for row in cur.execute(u'SELECT filename, width, height FROM files WHERE institution=? AND imageid=?', dup):
                 name = row[0].replace(' ', '_')
                 name_enc = urllib.quote(name.encode('utf-8'))

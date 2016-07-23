@@ -1,24 +1,28 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
 
 import sqlite3
-from controller import Controller
+import os
+from flask import render_template
+from .controller import Controller
 
-class Index(Controller):
 
-    def __init__(self, config):
-        Controller.__init__(self)
+class IndexController(Controller):
+
+    def __init__(self, app, config):
+        Controller.__init__(self, app)
         self.config = config
 
+    def get(self):
 
-    def get(self, request, args):
+        try:
+            f = self.read('last_update')
+            last_update = f.read()
+            f.close()
+        except IOError:
+            last_update = 'unknown'
 
-        f = open('../last_update', 'r')
-        last_update = f.read()
-        f.close()
-
-        sql = sqlite3.connect('../storage/oslobilder.db')
-        cur = sql.cursor()
-        rows = []
+        db = self.open_db()
+        cur = db.cursor()
         row = cur.execute(u'SELECT count(filename) FROM files').fetchone()
         total = row[0]
         rows = cur.execute(u'SELECT 1 FROM files GROUP BY institution,imageid').fetchall()
@@ -27,7 +31,7 @@ class Index(Controller):
         for row in cur.execute(u'SELECT institution, count(institution) FROM files GROUP BY institution'):
             totals[row[0]] = row[1]
 
-        return self.render_template('index.html',
+        return render_template('index.html',
                                active_page='./',
                                rows=[],
                                total=total,
