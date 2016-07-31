@@ -44,7 +44,7 @@ class UrlController(Controller):
             'Accept-Encoding': 'gzip'
         })
 
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, 'html.parser')
         commons = mwclient.Site('commons.wikimedia.org')
 
         # Find license info:
