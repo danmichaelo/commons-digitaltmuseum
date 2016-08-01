@@ -80,15 +80,13 @@ def get_commons_metadata(img):
         desc = tpl.parameters['Description'].value
     else:
         desc = ''
-        # logger.warning('[[File:%s]] %s', filename, '{{information}} does not contain |description=')
-        return
+        logger.warning('[[File:%s]] %s', pagename, '{{information}} does not contain |description=')
 
     if 'date' in tpl.parameters:
         date = tpl.parameters['date'].value
     elif 'Date' in tpl.parameters:
         date = tpl.parameters['Date'].value
     else:
-        date = ''
         logger.warning('[[File:%s]] %s', pagename, '{{information}} does not contain |date=')
         return
 
@@ -280,9 +278,7 @@ if __name__ == '__main__':
             if len(rows) != 1:
                 logger.error("Data integrity error! More than one database entry for File:%s", commons_pagename)
             else:
-                institution = rows[0]['institution']
-                imageid = rows[0]['imageid']
-                logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', commons_pagename, institution, imageid)
+                logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', commons_pagename, rows[0]['institution'], rows[0]['imageid'])
                 cur.execute(u'DELETE FROM files WHERE filename=?', [commons_pagename])
                 sql.commit()
 
