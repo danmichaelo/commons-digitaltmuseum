@@ -19,20 +19,20 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 
-fh = logging.FileHandler('main.log')
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
+# fh = logging.FileHandler('main.log')
+# fh.setLevel(logging.DEBUG)
+# fh.setFormatter(formatter)
 
-sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
-sh.setFormatter(formatter)
+# sh = logging.StreamHandler()
+# sh.setLevel(logging.DEBUG)
+# sh.setFormatter(formatter)
 
 app = Flask('app', template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 app.config['APPLICATION_ROOT'] = '/digitaltmuseum'
 # app.debug = True  # reload on each code change
 
-app.logger.addHandler(fh)
-app.logger.addHandler(sh)
+# app.logger.addHandler(fh)
+# app.logger.addHandler(sh)
 
 # app.logger.info('Flask server started in %s', settings.APP_ROOT)
 

@@ -18,15 +18,15 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 
-file_handler = logging.handlers.RotatingFileHandler('updater.log', maxBytes=100000, backupCount=3)
-file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+# file_handler = logging.handlers.RotatingFileHandler('updater.log', maxBytes=100000, backupCount=3)
+# file_handler.setLevel(logging.INFO)
+# file_handler.setFormatter(formatter)
+# logger.addHandler(file_handler)
 
-warn_handler = logging.FileHandler('warnings.log')
-warn_handler.setLevel(logging.WARNING)
-warn_handler.setFormatter(formatter)
-logger.addHandler(warn_handler)
+# warn_handler = logging.FileHandler('warnings.log')
+# warn_handler.setLevel(logging.WARNING)
+# warn_handler.setFormatter(formatter)
+# logger.addHandler(warn_handler)
 
 if debug:
     console_handler = logging.StreamHandler()
