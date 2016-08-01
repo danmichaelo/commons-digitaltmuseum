@@ -72,7 +72,7 @@ for crow in ccur:
     size = img.imageinfo['size']
     revid = img.revision
     
-    txt = img.edit(readonly=True)
+    txt = img.text()
     te = TemplateEditor(txt)
 
     tpl = te.templates['oslobilder'][0]
@@ -314,36 +314,38 @@ for crow in ccur:
          #yield '<tr><th>%s</th><td>%s</td></tr>' % (escape(k), escape(v))
     #yield '</table>'
 
-in_db = []
-for row in cur.execute('SELECT filename FROM files'):
-    in_db.append(row['filename'])
-in_db_set = set(in_db)
-on_commons_set = set(on_commons)
-logger.info("%d files in DB, %d files on Commons", len(in_db_set), len(on_commons_set))
-if len(in_db) != len(in_db_set):
-    logger.error("Data integrity error! len(in_db) = %d != len(in_db_set) = %d", len(in_db), len(in_db_set))
-elif len(on_commons) != len(on_commons_set):
-    logger.error("Data integrity error! len(on_commons) = %d != len(on_commons_set) = %d", len(on_commons), len(on_commons_set))
-elif on_commons_set.difference(in_db_set):
-    logger.error("Data integrity error! The following images on commons was not found in the DB: %s", ', '.join(list(on_commons_set.difference(in_db_set))))
-    print type(in_db[0]), type(on_commons[0])
-else:
-    for filename in list(in_db_set.difference(on_commons_set)):
-        rows = cur.execute(u'SELECT institution, imageid FROM files WHERE filename=?', [filename]).fetchall()
-        if len(rows) != 1:
-            logger.error("Data integrity error! More than one database entry for File:%s", filename)
-        else:
-            institution = rows[0]['institution']
-            imageid = rows[0]['imageid']
-            logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', filename, institution, imageid)
-            cur.execute(u'DELETE FROM files WHERE filename=?', [filename])
-            sql.commit()
+
+if __name__ == '__main__':
+    in_db = []
+    for row in cur.execute('SELECT filename FROM files'):
+        in_db.append(row['filename'])
+    in_db_set = set(in_db)
+    on_commons_set = set(on_commons)
+    logger.info("%d files in DB, %d files on Commons", len(in_db_set), len(on_commons_set))
+    if len(in_db) != len(in_db_set):
+        logger.error("Data integrity error! len(in_db) = %d != len(in_db_set) = %d", len(in_db), len(in_db_set))
+    elif len(on_commons) != len(on_commons_set):
+        logger.error("Data integrity error! len(on_commons) = %d != len(on_commons_set) = %d", len(on_commons), len(on_commons_set))
+    elif on_commons_set.difference(in_db_set):
+        logger.error("Data integrity error! The following images on commons was not found in the DB: %s", ', '.join(list(on_commons_set.difference(in_db_set))))
+        print type(in_db[0]), type(on_commons[0])
+    else:
+        for filename in list(in_db_set.difference(on_commons_set)):
+            rows = cur.execute(u'SELECT institution, imageid FROM files WHERE filename=?', [filename]).fetchall()
+            if len(rows) != 1:
+                logger.error("Data integrity error! More than one database entry for File:%s", filename)
+            else:
+                institution = rows[0]['institution']
+                imageid = rows[0]['imageid']
+                logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', filename, institution, imageid)
+                cur.execute(u'DELETE FROM files WHERE filename=?', [filename])
+                sql.commit()
 
 
-f = open('last_update', 'w')
-f.write('%.4f' % time.time())
-f.close()
+    f = open('last_update', 'w')
+    f.write('%.4f' % time.time())
+    f.close()
 
-runend = datetime.datetime.now()
-runtime = (runend - runstart).total_seconds()
-logger.info('Updater completed. Runtime was %.f seconds.', runtime)
+    runend = datetime.datetime.now()
+    runtime = (runend - runstart).total_seconds()
+    logger.info('Updater completed. Runtime was %.f seconds.', runtime)
