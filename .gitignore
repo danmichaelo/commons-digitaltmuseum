@@ -2,16 +2,15 @@
 *.py[co]
 *.egg-info
 
-
 # Login info
 wp_private.py
 replica.my.cnf
-
 
 # Skip DB, rotated logs and backups
 *.db
 *.log*
 *.bak
+instance
 
 # System stuff
 *.swp

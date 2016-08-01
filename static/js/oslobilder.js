@@ -79,7 +79,7 @@
 
     function getData(addToHistory) {
         var postdata = prepareData(addToHistory);
-        $.getJSON('backend', postdata, function (response) {
+        $.getJSON('search', postdata, function (response) {
             var error = 0,
                 nimgs = 0,
                 i;

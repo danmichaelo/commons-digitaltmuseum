@@ -68,6 +68,11 @@ def show_index():
     return controllers.IndexController(app, config).get()
 
 
+@app.route('/search')
+def show_search():
+    return controllers.SearchController(app, config).get(request)
+
+
 @app.route('/stats')
 def show_stats():
     return controllers.StatsController(app, config).get()
