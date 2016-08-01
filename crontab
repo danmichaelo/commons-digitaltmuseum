@@ -1,2 +1,2 @@
 MAILTO=""
-37 17 * * * jsub -l release=trusty dbsync.job
+37 17 * * * jsub -o dbsync.log -j y -l release=trusty dbsync.job
