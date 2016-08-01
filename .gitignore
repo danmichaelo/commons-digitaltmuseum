@@ -2,18 +2,25 @@
 *.py[co]
 *.egg-info
 
-# Vim swap
-*.swp
 
 # Login info
 wp_private.py
+replica.my.cnf
+
 
 # Skip DB, rotated logs and backups
 *.db
 *.log*
 *.bak
 
-# Mac stuff 
+# System stuff
+*.swp
+*.vim*
 *.DS_Store
+*.bash*
+.profile
+.inputrc
+.ipython
+.sqlite_history
 
 ENV
