@@ -12,11 +12,11 @@ setup(name='digitaltmuseum',
                         'pyyaml',
                         'mwclient',
                         'mwtemplates',
-                        'oursql',
+                        'PyMySQL',
                         'beautifulsoup4',
                         #flup
                         'flask',
                         'six',
-                        'requests[security]',
+                        'requests',
                         ],
       zip_safe=False)

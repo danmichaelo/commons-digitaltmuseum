@@ -9,7 +9,7 @@ from mwtemplates import TemplateEditor
 import logging
 import logging.handlers
 import time
-import oursql
+import pymysql.cursors
 
 debug = True
 runstart = datetime.datetime.now()
@@ -129,24 +129,22 @@ sql = sqlite3.connect('instance/oslobilder.db')
 sql.row_factory = sqlite3.Row
 cur = sql.cursor()
 
-db = oursql.connect(db='commonswiki_p',
+db = pymysql.connect(db='commonswiki_p',
                     host='commonswiki.labsdb',
-                    read_default_file=os.path.expanduser('~/replica.my.cnf'),
-                    charset=None,
-                    use_unicode=False)
+                    read_default_file=os.path.expanduser('~/replica.my.cnf'))
 ccur = db.cursor()
 
 on_commons = []
 
 # Find all pages that embeds {{Oslobilder}}
-ccur.execute('SELECT page.page_title, max(revision.rev_id) FROM page, templatelinks LEFT JOIN revision ON templatelinks.tl_from=revision.rev_page WHERE templatelinks.tl_namespace=10 AND templatelinks.tl_title=? AND templatelinks.tl_from=page.page_id AND page.page_namespace=6 GROUP BY revision.rev_page', [template.page_title.encode('utf-8')])
+ccur.execute('SELECT page.page_title, max(revision.rev_id) FROM page, templatelinks LEFT JOIN revision ON templatelinks.tl_from=revision.rev_page WHERE templatelinks.tl_namespace=10 AND templatelinks.tl_title=? AND templatelinks.tl_from=page.page_id AND page.page_namespace=6 GROUP BY revision.rev_page', [template.page_title])
 for crow in ccur:
 
     commons_pagename = crow[0].replace('_', ' ').decode('utf-8')
     on_commons.append(commons_pagename)
     lastrev = crow[1]
 
-    rows = cur.execute(u'SELECT * FROM files WHERE revision=?', [lastrev]).fetchall()
+    rows = cur.execute('SELECT * FROM files WHERE revision=?', [lastrev]).fetchall()
     if rows:
         # Latest revision of the page is already in our local DB
         continue
@@ -159,20 +157,20 @@ for crow in ccur:
         # Uh oh, something failed
         continue
     
-    firstrev = img.revisions(limit=1, dir='newer').next()
+    firstrev = next(img.revisions(limit=1, dir='newer'))
 
     # Check if identification has changed
-    rows = cur.execute(u'SELECT * FROM files WHERE NOT(institution=? AND imageid=?) AND first_revision=?', [data['institution'], data['imageid'], firstrev['revid']]).fetchall()
+    rows = cur.execute('SELECT * FROM files WHERE NOT(institution=? AND imageid=?) AND first_revision=?', [data['institution'], data['imageid'], firstrev['revid']]).fetchall()
     if rows:
         row = rows[0]
         logger.info('[[File:%s]] Identification changed from %s/%s to %s/%s' % (commons_pagename, row['institution'], row['imageid'], data['institution'], data['imageid']))
         try:
-            cur.execute(u'UPDATE files SET institution=?, imageid=? WHERE first_revision=?', [data['institution'], data['imageid'], firstrev['revid']])
+            cur.execute('UPDATE files SET institution=?, imageid=? WHERE first_revision=?', [data['institution'], data['imageid'], firstrev['revid']])
             sql.commit()
         except sqlite3.integrityerror as e:
             logger.error('[[File:%s]] was not saved. error: %s. query: %s', commons_pagename, e, query)
 
-    rows = cur.execute(u'SELECT * FROM files WHERE institution=? AND imageid=?', (data['institution'], data['imageid'])).fetchall()
+    rows = cur.execute('SELECT * FROM files WHERE institution=? AND imageid=?', (data['institution'], data['imageid'])).fetchall()
     if rows:
         found = False
         for row in rows:
@@ -184,19 +182,19 @@ for crow in ccur:
                     logger.info('UPDATE [[File:%s]]:', commons_pagename)
                     para = []
                     val = []
-                    for k, v in data.iteritems():
+                    for k, v in data.items():
                         if v != row[k]:
                             oldval = row[k]
-                            if type(oldval) == unicode and len(oldval) > 40:
+                            if type(oldval) == str and len(oldval) > 40:
                                 oldval = oldval[:38] + '...'
                             newval = v
-                            if type(newval) == unicode and len(newval) > 40:
+                            if type(newval) == str and len(newval) > 40:
                                 newval = newval[:38] + '...'
                             logger.info('    %s: %s -> %s', k, oldval, newval)
                             para.append('%s=?' % k)
                             val.append(v)
                     val.append(row['first_revision'])
-                    query = u'UPDATE files SET %s WHERE first_revision=?' % ', '.join(para)
+                    query = 'UPDATE files SET %s WHERE first_revision=?' % ', '.join(para)
                     try:
                         cur.execute(query, val)
                     except sqlite3.IntegrityError as e:
@@ -212,9 +210,9 @@ for crow in ccur:
             data['first_revision'] = firstrev['revid']
             data['uploader'] = firstrev['user']
 
-            para = [','.join(data.keys()), ','.join(['?' for q in range(len(data))])]
-            val = data.values()
-            query = u'INSERT INTO files (%s) VALUES (%s)' % tuple(para)
+            para = [','.join(list(data.keys())), ','.join(['?' for q in range(len(data))])]
+            val = list(data.values())
+            query = 'INSERT INTO files (%s) VALUES (%s)' % tuple(para)
             try:
                 cur.execute(query, val)
             except sqlite3.IntegrityError as e:
@@ -222,20 +220,20 @@ for crow in ccur:
             sql.commit()
 
     else:
-        firstrev = img.revisions(limit=1, dir='newer').next()
+        firstrev = next(img.revisions(limit=1, dir='newer'))
 
-        row2 = cur.execute(u'SELECT * FROM files WHERE first_revision=?', [firstrev['revid']]).fetchone()
+        row2 = cur.execute('SELECT * FROM files WHERE first_revision=?', [firstrev['revid']]).fetchone()
         if row2:
             logger.info('UPDATE [[File:%s]]: identification changed from %s/%s to %s/%s',
                         commons_pagename, row2['institution'], row2['imageid'], data['institution'], data['imageid'])
             para = []
             val = []
-            for k,v in data.iteritems():
+            for k,v in data.items():
                 if v != row2[k]:
                     para.append('%s=?' % k)
                     val.append(v)
             val.append(firstrev['revid'])
-            query = u'UPDATE files SET %s WHERE first_revision=?' % ', '.join(para)
+            query = 'UPDATE files SET %s WHERE first_revision=?' % ', '.join(para)
             logger.info(query)
             try:
                 cur.execute(query, val)
@@ -250,9 +248,9 @@ for crow in ccur:
             data['first_revision'] = firstrev['revid']
             data['uploader'] = firstrev['user']
 
-            para = [','.join(data.keys()), ','.join(['?' for q in range(len(data))])]
-            val = data.values()
-            query = u'INSERT INTO files (%s) VALUES (%s)' % tuple(para)
+            para = [','.join(list(data.keys())), ','.join(['?' for q in range(len(data))])]
+            val = list(data.values())
+            query = 'INSERT INTO files (%s) VALUES (%s)' % tuple(para)
             try:
                 cur.execute(query, val)
             except sqlite3.IntegrityError as e:
@@ -274,12 +272,12 @@ if __name__ == '__main__':
         logger.error("Data integrity error! The following images on commons was not found in the DB: %s", ', '.join(list(on_commons_set.difference(in_db_set))))
     else:
         for commons_pagename in list(in_db_set.difference(on_commons_set)):
-            rows = cur.execute(u'SELECT institution, imageid FROM files WHERE filename=?', [commons_pagename]).fetchall()
+            rows = cur.execute('SELECT institution, imageid FROM files WHERE filename=?', [commons_pagename]).fetchall()
             if len(rows) != 1:
                 logger.error("Data integrity error! More than one database entry for File:%s", commons_pagename)
             else:
                 logger.warning('REMOVED [[%s]]: no longer identified as %s/%s', commons_pagename, rows[0]['institution'], rows[0]['imageid'])
-                cur.execute(u'DELETE FROM files WHERE filename=?', [commons_pagename])
+                cur.execute('DELETE FROM files WHERE filename=?', [commons_pagename])
                 sql.commit()
 
     f = open('instance/last_update', 'w')

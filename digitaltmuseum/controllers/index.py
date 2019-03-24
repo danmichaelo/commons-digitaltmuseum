@@ -1,5 +1,4 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
-
 import sqlite3
 import os
 from flask import render_template
@@ -23,12 +22,12 @@ class IndexController(Controller):
 
         db = self.open_db()
         cur = db.cursor()
-        row = cur.execute(u'SELECT count(filename) FROM files').fetchone()
+        row = cur.execute('SELECT count(filename) FROM files').fetchone()
         total = row[0]
-        rows = cur.execute(u'SELECT 1 FROM files GROUP BY institution,imageid').fetchall()
+        rows = cur.execute('SELECT 1 FROM files GROUP BY institution,imageid').fetchall()
         unique = len(rows)
         totals = {}
-        for row in cur.execute(u'SELECT institution, count(institution) FROM files GROUP BY institution'):
+        for row in cur.execute('SELECT institution, count(institution) FROM files GROUP BY institution'):
             totals[row[0]] = row[1]
 
         return render_template('index.html',

@@ -1,10 +1,9 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
-
 import json
 import re
 from werkzeug.wrappers import Response
 from time import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from .controller import Controller
 
 import logging
@@ -34,7 +33,7 @@ class SearchController(Controller):
         logger.info('DO MO SO')
 
         req_inst = []
-        for key, v in request.args.items():
+        for key, v in list(request.args.items()):
             val = v.strip()
             if key.split('_')[0] == 'inst':
                 req_inst.append(key.split('_')[1])
@@ -78,7 +77,7 @@ class SearchController(Controller):
         sql = self.open_db()
         cur = sql.cursor()
         rows = []
-        query = u'SELECT filename, width, height, size, institution, imageid, ' + \
+        query = 'SELECT filename, width, height, size, institution, imageid, ' + \
                  'collection, author, date, description, upload_date ' + \
                  'FROM files' + where + ' ORDER BY %s %s LIMIT %s' % (psort, porder, plimit)
 
@@ -88,7 +87,7 @@ class SearchController(Controller):
         for row in cur.execute(query, where_data):
 
             name = row[0].replace(' ', '_')
-            name_enc = urllib.quote(name.encode('utf-8'))
+            name_enc = urllib.parse.quote(name.encode('utf-8'))
 
             url = 'https://commons.wikimedia.org/wiki/File:' + name_enc
             thumbmax = 120

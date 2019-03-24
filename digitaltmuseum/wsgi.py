@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-
 import requests
 from flask import Flask
 from flask import render_template
@@ -27,7 +23,10 @@ formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s')
 # sh.setLevel(logging.DEBUG)
 # sh.setFormatter(formatter)
 
-app = Flask('app', template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+app = Flask('app',
+            template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+            instance_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance'))
+
 app.config['APPLICATION_ROOT'] = '/digitaltmuseum'
 # app.debug = True  # reload on each code change
 
@@ -36,8 +35,9 @@ app.config['APPLICATION_ROOT'] = '/digitaltmuseum'
 
 # app.logger.info('Flask server started in %s', settings.APP_ROOT)
 
-config_file = os.path.join(app.root_path, 'config.yml')
-config = yaml.load(open(config_file, 'r'))
+config_file = os.path.expanduser('~/config.yml')
+with open(config_file) as fp:
+    config = yaml.load(fp, Loader=yaml.FullLoader)
 
 app.logger.info('Root path: %s', app.root_path)
 app.logger.info('Instance path: %s', app.instance_path)

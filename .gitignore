@@ -23,3 +23,4 @@ instance
 .sqlite_history
 
 ENV
+www/python/venv

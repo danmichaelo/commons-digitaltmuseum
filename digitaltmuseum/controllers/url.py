@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
 import logging
 import logging.handlers
 
@@ -9,7 +8,7 @@ import sys
 import os
 from werkzeug.wrappers import Response
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -17,7 +16,7 @@ import cgi
 from cgi import escape
 import mwclient
 import sqlite3
-import StringIO, gzip
+import io, gzip
 import yaml
 
 from flask import request, url_for, make_response
@@ -187,7 +186,7 @@ class UrlController(Controller):
         db = self.open_db()
         db.row_factory = sqlite3.Row
         cur = db.cursor()
-        rows = cur.execute(u'SELECT filename FROM files ' + \
+        rows = cur.execute('SELECT filename FROM files ' + \
                 'WHERE institution=? AND imageid=?', (institution, imageid)).fetchall()
         if len(rows) > 0:
             return { 'error': 'duplicate', 'institution': institution, 'imageid': imageid, 'filename': rows[0][0] }
@@ -212,16 +211,16 @@ class UrlController(Controller):
 
         hostname = re.match(r'http(s)?://(www\.)?([a-z]*?)\.no', url)
         if hostname == None:
-            print "Content-Type: text/plain"
-            print
-            print "Invalid url!"
+            print("Content-Type: text/plain")
+            print()
+            print("Invalid url!")
             sys.exit(0)
 
         hostname = hostname.group(3)
         if hostname != 'oslobilder' and hostname != 'digitaltmuseum':
-            print "Content-Type: text/plain"
-            print
-            print "Invalid url!"
+            print("Content-Type: text/plain")
+            print()
+            print("Invalid url!")
             sys.exit(0)
 
         data = json.dumps(self.check_url(url, hostname))

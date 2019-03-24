@@ -1,7 +1,6 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
-
 import sqlite3
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from flask import render_template
 from .controller import Controller
 
@@ -17,17 +16,17 @@ class DuplicatesController(Controller):
         db = self.open_db()
         cur = db.cursor()
         dups = []
-        for row in cur.execute(u'SELECT institution,imageid,count(*) FROM files GROUP BY institution,imageid'):
+        for row in cur.execute('SELECT institution,imageid,count(*) FROM files GROUP BY institution,imageid'):
             if row[2] > 1:
                 dups.append([row[0], row[1]])
 
-        html = u'<ul>'
+        html = '<ul>'
         for dup in dups:
             html += '<li>%s/%s er oppgitt som kilde for:\n<ul class="dups">\n' % tuple(dup)
             # yield(type(html).__name__)
-            for row in cur.execute(u'SELECT filename, width, height FROM files WHERE institution=? AND imageid=?', dup):
+            for row in cur.execute('SELECT filename, width, height FROM files WHERE institution=? AND imageid=?', dup):
                 name = row[0].replace(' ', '_')
-                name_enc = urllib.quote(name.encode('utf-8'))
+                name_enc = urllib.parse.quote(name.encode('utf-8'))
                 thumbmax = 120
                 if row[1] > row[2]:
                     thumbw = thumbmax
