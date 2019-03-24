@@ -137,10 +137,10 @@ ccur = db.cursor()
 on_commons = []
 
 # Find all pages that embeds {{Oslobilder}}
-ccur.execute('SELECT page.page_title, max(revision.rev_id) FROM page, templatelinks LEFT JOIN revision ON templatelinks.tl_from=revision.rev_page WHERE templatelinks.tl_namespace=10 AND templatelinks.tl_title=? AND templatelinks.tl_from=page.page_id AND page.page_namespace=6 GROUP BY revision.rev_page', [template.page_title])
+ccur.execute('SELECT page.page_title, max(revision.rev_id) FROM page, templatelinks LEFT JOIN revision ON templatelinks.tl_from=revision.rev_page WHERE templatelinks.tl_namespace=10 AND templatelinks.tl_title=%s AND templatelinks.tl_from=page.page_id AND page.page_namespace=6 GROUP BY revision.rev_page', [template.page_title])
 for crow in ccur:
 
-    commons_pagename = crow[0].replace('_', ' ').decode('utf-8')
+    commons_pagename = crow[0].decode('utf-8').replace('_', ' ')
     on_commons.append(commons_pagename)
     lastrev = crow[1]
 
